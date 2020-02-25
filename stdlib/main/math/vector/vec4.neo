@@ -1,0 +1,32 @@
+import "std/math" as math;
+
+final Vec4MetaObject;
+
+proc __init() {
+	Vec4MetaObject = {
+	    __add = proc(self, other) => Vec4(self.x + other.x, self.y + other.y, self.z + other.z, self.w + other.w),
+	    __sub = proc(self, other) => Vec4(self.x - other.x, self.y - other.y, self.z - other.z, self.w - other.w),
+	    __mul = proc(self, other) => Vec4(self.x * other, self.y * other, self.z * other, self.w * other),        
+	    __div = proc(self, other) => Vec4(self.x / other, self.y / other, self.z / other, self.w / other),
+	    __neg = proc(self) => Vec4(-self.x, -self.y, -self.z, -self.w),
+	    __equals = proc(self, other, deep) => self.x == other.x &&
+	                                          self.y == other.y &&
+	                                          self.z == other.z &&
+	                                          self.w == other.w,                                                       
+	    __length = proc() => math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2 + self.w ** 2),
+	    __tostring = proc(self) => $"({self.x}, {self.y}, {self.z}, {self.w})"
+	};
+}
+
+exported proc Vec4(x, y, z, w) {
+    final self = {
+        x = x,
+        y = y,
+        z = z,
+        w = w
+    };
+
+    self.normalize = proc() => self.scale(1 / self.length());
+
+    return frozen setMetaObject(self, Vec4MetaObject);
+}

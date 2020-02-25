@@ -1,0 +1,28 @@
+exported proc assert(condition, message) {
+	if condition  return;
+
+	if message == nil  throw "assertion failed";
+	else throw "assertion failed: " .. message;
+}
+
+exported proc assertNot(condition, message) => assert(!condition, message)
+
+exported proc assertThrows(fn) {
+	try {
+		fn();
+		throw "assertion failed: expected exception";
+	} catch e {
+	}
+}
+
+exported proc assertType(x, t) 				=> assert(type(x) == t,	 	$"got type '{type(x)}', expected '{t}'; value: {x}")
+exported proc assertEqual(a, b) 			=> assert(a == b, 			$"expected '{a}' to equal '{b}'")
+exported proc assertDeepEqual(a, b) 		=> assert(a === b, 			$"expected '{a}' to equal '{b}'")
+exported proc assertNotEqual(a, b) 			=> assert(a != b, 			$"expected '{a}' not to equal '{b}'")
+exported proc assertNotDeepEqual(a, b) 		=> assert(a !== b, 			$"expected '{a}' not to equal '{b}'")
+exported proc assertAbove(x, a) 			=> assert(x > a, 			$"expected '{x}' to be above '{a}'")
+exported proc assertBelow(x, a) 			=> assert(x < a, 			$"expected '{x}' to be below '{a}'")
+exported proc assertAboveClosed(x, a)		=> assert(x >= a, 			$"expected '{x}' to be above or equal to '{a}'")
+exported proc assertBelowClosed(x, a)		=> assert(x <= a, 			$"expected '{x}' to be below or equal to '{a}'")
+exported proc assertBetween(x, a, b)		=> assert(x > a && x < b, 	$"expected '{x}' to be above '{a}' and below '{b}'")
+exported proc assertBetweenClosed(x, a, b)	=> assert(x >= a && x <= b, $"expected '{x}' to be above or equal to '{a}' and below or equal to '{b}'")

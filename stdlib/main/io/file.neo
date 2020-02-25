@@ -1,0 +1,86 @@
+import "std/ffi" as ffi;
+
+final native_FileMode;
+final native_FileMode_Open;
+final native_FileMode_Create;
+
+final native_Path;
+final native_GetFullPath;
+
+proc __init() {
+    native_FileMode = ffi.class("System.IO.FileMode");
+    native_FileMode_Open = native_FileMode.Open;
+    native_FileMode_Create = native_FileMode.Create;
+
+    native_Path = ffi.class("System.IO.Path");
+    native_GetFullPath = native_Path.GetFullPath;
+}  
+
+exported proc open(path, mode) {
+    path = native_GetFullPath(path);
+
+    if mode == "r" && !exists(path) {
+        throw "file not found: " .. path;
+    }
+    
+    if mode == "r" {
+        var stream = ffi.new("System.IO.FileStream", path, native_FileMode_Open);
+        var reader = ffi.new("System.IO.StreamReader", stream);
+        
+        return frozen {
+            read = proc() => reader.Read(),
+            readLine = proc() => reader.ReadLine(),
+            close = proc() {
+                reader.Close();
+            }
+        };
+    } else if mode == "w" {
+        var stream = ffi.new("System.IO.FileStream", path, native_FileMode_Create);
+        var writer = ffi.new("System.IO.StreamWriter", stream);
+
+        return frozen {
+            write = proc(...) {
+                for s in ...  writer.Write(s);
+            },
+            writeLine = proc(...) {
+                if #... == 0  writer.WriteLine();
+                else  for s in ...  writer.WriteLine(s);
+            },
+            flush = proc() {
+                writer.Flush();
+            },
+            close = proc() {
+                writer.Close();
+            }
+        };
+    } else {
+        throw "unsupported mode: " .. mode;
+    }
+}
+
+exported proc readAllLines(path) {
+    final lines = [];
+
+    final fh = open(path, "r");
+    defer fh.close();
+
+    var line = fh.readLine();
+    while line != nil {
+        insert(lines, line);
+        line = fh.readLine();
+    }
+
+    return lines;
+}
+
+exported proc writeAllLines(path, lines) {
+    assert(type(lines) == "array");
+
+    final fh = open(path, "w");
+    defer fh.close();
+
+    for line in lines {
+        assert(type(line) == "string");
+        fh.writeLine(line);
+    }
+}

@@ -1,0 +1,29 @@
+import "../ProteinFolding/Protein";
+import "../ProteinFolding/brute_force";
+import "../ProteinFolding/utils";
+
+final MAX = 63;
+
+exported proc protein_fold_test() {
+    for i in 1 to MAX {
+        final chain = makeChain(i);
+        final protein = Protein(chain);
+        final folder = Folder(protein);
+        final best = folder.fold();
+        final bestScore = best.score();
+
+        write("\u001B[2J\u001B[;H");
+
+        print("# " .. i);
+        print("Chain: " .. chain);
+        print("Length: " .. #chain);
+        print("Score: " .. bestScore);
+        print();
+        best.write(pretty_write);
+        print();
+        
+        print();
+        best.writePacked(pretty_write);
+        print();
+    }
+}

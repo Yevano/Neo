@@ -1,0 +1,22 @@
+exported proc ShaderProgram() {
+    final shaders = [];
+
+    return frozen {
+        addShader = proc(shader) => insert(shaders, shader),
+        apply = proc(frameBuffer) {
+            final pd = frameBuffer.pixelData;
+            final w = frameBuffer.width;
+            final h = frameBuffer.height;
+            for i in 0 to #shaders - 1 {
+                final shaderFunc = shaders[i].shaderFunc;
+                final inputs = shaders[i].inputs;
+                for y in 0 to h - 1 {
+                    for x in 0 to w - 1 {
+                        final index = x + y * w;
+                        shaderFunc(pd[index], x, y, inputs);
+                    }
+                }
+            }
+        }
+    };
+}

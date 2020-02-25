@@ -1,0 +1,22 @@
+#!/usr/bin/env neo
+
+proc collatz(x) => (x & 1) == 0 ? x / 2 : 3 * x + 1
+
+exported proc steps(x) {
+    var count = 0;
+
+    while x != 1 {
+        x = collatz(x);
+        count += 1;
+    }
+
+    return count;
+}
+
+proc main() {
+    var x = 1;
+    while true {
+        write(x, ": ", steps(x), "\n");
+        x += 1;
+    }
+}

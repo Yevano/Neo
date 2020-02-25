@@ -1,0 +1,26 @@
+#!/usr/bin/env neo
+
+import "std/io/file" as file;
+
+final CHARS = {
+	["<"] = true,
+	[">"] = true,
+	["+"] = true,
+	["-"] = true,
+	["."] = true,
+	[","] = true,
+	["["] = true,
+	["]"] = true,
+};
+
+proc main(args) {
+	if #args != 1 {
+		print("Usage: strip <file>");
+		return;
+	}
+
+	final code = file.readAllText(args[0]);
+
+	for c in code  if CHARS[c] != nil  write(c);
+	write("\n");
+}

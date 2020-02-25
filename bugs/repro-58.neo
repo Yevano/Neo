@@ -1,0 +1,21 @@
+exported proc main() {
+	final a = [ "" ];
+
+	for v in a {
+		try {
+
+		} catch e {
+
+		}
+	}
+
+	final o = { a = 4 };
+
+	for k, v in o {
+		try {
+
+		} catch e {
+			
+		}
+	}
+}

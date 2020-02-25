@@ -1,0 +1,72 @@
+import "std/collections/bitset";
+import "std/assert";
+import "std/math" as math;
+
+exported proc test(t) {
+	t.describe("BitSet", proc(t) {
+		t.describe("set,clear,get", proc(t) {
+			t.it("works", proc() {
+				final bs = BitSet();
+
+				for j in 1 to 3 {
+					final bits = [];
+					for i in 0 to 99 {
+						final b = math.randBool();
+						insert(bits, b);
+
+						if b  bs.set(i);
+						else  bs.clear(i);			
+					}
+
+					for i in 0 to #bits - 1  assertEqual(bs.get(i), bits[i]);
+				}
+			});
+		});
+
+		t.describe("firstSetBit", proc(t) {
+			t.it("works", proc() {
+				final bs = BitSet();
+				
+				bs.set(77);
+				bs.set(88);
+
+				assertEqual(bs.firstSetBit(), 77);
+			});
+		});
+
+		t.describe("firstClearBit", proc(t) {
+			t.it("works", proc() {
+				final bs = BitSet();
+
+				for i in 0 to 7  bs.set(i);		
+
+				assertEqual(bs.firstClearBit(), 8);
+			});
+		});
+
+		t.describe("lastSetBit", proc(t) {
+			t.it("works", proc() {
+				final bs = BitSet();
+
+				bs.set(1);
+				bs.set(12);
+				bs.set(42);
+
+				assertEqual(bs.lastSetBit(), 42);
+			});
+		});
+
+		t.describe("lastClearBit", proc(t) {
+			t.it("works", proc() {
+				final bs = BitSet();
+
+				bs.set(1);
+				bs.set(12);
+				bs.set(23);
+				bs.set(31);
+
+				assertEqual(bs.lastClearBit(), 30);
+			});
+		});
+	});
+}

@@ -1,0 +1,58 @@
+import "std/assert";
+
+exported proc containsCharacter(s, l) { 
+    assert(type(s) == "string");
+    assert(type(l) == "string");
+    
+    for c in s {
+        if c == l  return true;
+    }
+
+    return false;
+}
+
+exported proc isLetter(c) => (byte(c) >= byte("a") && byte(c) <= byte("z")) || (byte(c) >= byte("A") && byte(c) <= byte("Z"))
+exported proc isDigit(c) => byte(c) >= byte("0") && byte(c) <= byte("9")
+
+exported proc split(s, char) {
+    assert(type(s) == "string");
+    assert(type(char) == "string");
+    assert(#char == 1);
+
+    var parts = [];
+
+    var start = 0;
+    for i in 0 to #s - 1 {
+        var c = s[i];
+        if c == char {
+            insert(parts, s[start:i - 1]);
+            start = i + 1;
+        }
+    }
+
+    if start < #s  insert(parts, s[start:#s - 1]);
+
+    return parts;
+}
+
+exported proc padLeft(str, totalLength, padChar) {
+	if padChar == nil  padChar = " ";
+
+	final len = totalLength - #str;
+	if len <= 0  return str;
+
+	for i in 1 to len  str = padChar .. str;
+
+	return str;
+}
+
+exported proc padRight(str, totalLength, padChar) {
+	if padChar == nil  padChar = " ";
+
+	final len = totalLength - #str;
+	if len <= 0  return str;
+
+	for i in 1 to len  str ..= padChar;
+
+	return str;
+}

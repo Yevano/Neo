@@ -1,0 +1,101 @@
+import "std/string" as string;
+
+proc make(parent, title, fn) {
+    final tests = [];
+    final suites = [];
+
+    final self = {
+        describe = proc(name, fn) {
+            insert(suites, make(self, name, fn));
+        },
+        it = proc(name, fn) {
+            insert(tests, { name = name, fn = fn });
+        },
+        root = proc() {
+            if parent == nil    return self;
+            else                return parent.root();  
+        },
+        test = proc(level) {
+            if level == nil  level = 0;
+
+            proc indent(n) {
+                if n == nil n = level;
+                for i in 1 to n  write("    ");
+            }
+
+            indent();
+            print(title);
+
+            for s in suites {
+                s.test(level + 1);
+            }
+
+            final root = self.root();
+
+            for t in tests {
+                indent(level + 1);
+
+                try {
+                    t.fn();
+                    t.result = true;
+
+                    root.addPass();
+                    print($"\u001B[32m\u2714\u001B[0m {t.name}");
+                } catch e {
+                    t.result = false;
+                    t.error = e;
+
+                    final idx = root.addFailure(t);
+                    print($"\u001B[31m{idx})\u001B[0m {t.name}");
+                }   
+            }
+        }
+    };
+
+    fn(self);
+
+    if parent == nil {
+        final fails = [];
+        var passed = 0;
+
+        self.addFailure = proc(t) {
+            insert(fails, t);
+            return #fails;
+        };
+
+        self.addPass = proc() {
+            passed++;
+        };
+
+        self.test();
+
+        print();
+
+        for i in 0 to #fails - 1 { 
+            final t = fails[i];
+
+            print($"{i+1}) {t.name}");
+
+            if(type(t.error) == "string") {
+                var parts = string.split(t.error, "\n");
+                for part in parts  write("    ", part, "\n");
+            } else {
+                print(t.error);
+            }
+        }
+
+        print();
+
+        final failed = #fails;
+        final total = passed + failed;
+
+        write("\u001B[31m", failed, " failing (", failed / total * 100, "%)\u001B[0m\n");
+        write("\u001B[32m", passed, " passing (", passed / total * 100, "%)\u001B[0m\n");
+
+        exit(failed > 0 ? 1 : 0);
+    }   
+
+    return frozen self;
+}
+
+exported proc describe(title, fn) => make(nil, title, fn)

@@ -1,0 +1,51 @@
+import "std/math" as math;
+
+exported proc FrameBuffer(w, h) {
+    final pixelData = [];
+
+    for y in 0 to h - 1 {
+        for x in 0 to w - 1 {
+            insert(pixelData, {
+                red = 0,
+                green = 0,
+                blue = 0
+            });
+        }
+    }
+
+    return frozen {
+        width = w,
+        height = h,
+        pixelData = pixelData,
+        clear = proc(r, g, b) {
+            if r == nil  r = 0;
+            if g == nil  g = 0;
+            if b == nil  b = 0;
+
+            for y in 0 to h - 1 {
+                for x in 0 to w - 1 {
+                    final pixel = pixelData[x + y * w];
+                    pixel.red = r;
+                    pixel.green = g;
+                    pixel.blue = b;
+                }
+            }
+        },
+        draw = proc() {
+            var s = "\u001B[2J\u001B[;H";
+            for y in 0 to h - 1 {
+                for x in 0 to w - 1 {
+                    final index = x + y * w;
+                    final pixel = pixelData[index];
+                    final red = int(math.round(pixel.red * 5));
+                    final green = int(math.round(pixel.green * 5));
+                    final blue = int(math.round(pixel.blue * 5));
+                    final ansi = 16 + 36 * red + 6 * green + blue;
+                    s ..= "\u001B[48;5;" .. ansi .. "m ";
+                }
+                s ..= "\n";
+            }
+            write(s, "\u001B[0m");
+        }
+    };
+}

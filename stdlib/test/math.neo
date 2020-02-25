@@ -1,0 +1,159 @@
+import "std/math";
+import "std/assert";
+
+exported proc test(t) {
+    t.describe("math", proc(t) {
+        t.describe("sin", proc(t) {
+            t.it("works", proc() {
+                assertEqual(sin(0), 0);        
+            });
+        });   
+
+        t.describe("cos", proc(t) {
+            t.it("works", proc() {
+                assertEqual(cos(0), 1);
+            });
+        });
+
+        t.describe("tan", proc(t) {
+            t.it("works", proc() {
+                assertEqual(tan(0), 0);
+            });
+        });
+
+        t.describe("asin", proc(t) {
+            t.it("works", proc() {
+                assertEqual(asin(0), 0);
+            });
+        });
+
+        t.describe("acos", proc(t) {
+            t.it("works", proc() {
+                assertEqual(acos(1), 0);
+            });
+        });
+
+        t.describe("atan", proc(t) {
+            t.it("works", proc() {
+                assertEqual(atan(0), 0);
+            });
+        });
+
+        t.describe("floor", proc(t) {
+            t.it("works", proc() {
+                assertEqual(floor(42), 42);
+                assertEqual(floor(3.14), 3);
+                assertEqual(floor(9.8), 9);
+            });
+        });
+
+        t.describe("ceil", proc(t) {
+            t.it("works", proc() {
+                assertEqual(ceil(42), 42);
+                assertEqual(ceil(3.14), 4);
+                assertEqual(ceil(9.8), 10);
+            });
+        });
+
+        t.describe("round", proc(t) {
+            t.it("works", proc() {
+                assertEqual(round(42), 42);
+                assertEqual(round(3.14), 3);
+                assertEqual(round(9.8), 10);
+            });
+        });
+
+        t.describe("sqrt", proc(t) {
+            t.it("works", proc() {
+                for i in 1 to 6  assertEqual(sqrt(i ** 2), i);
+            });
+        });
+
+        t.describe("exp", proc(t) {
+            t.it("works", proc() {
+                assertEqual(exp(0), 1);
+                assertEqual(toString(exp(1)), "2.71828182845905");
+            });
+        });
+
+        t.describe("abs", proc(t) {
+            t.it("works", proc() {
+                assertEqual(abs(42), 42);
+                assertEqual(abs(-24), 24);
+            });
+        });
+
+        t.describe("min", proc(t) {
+            t.it("works", proc() {
+                assertEqual(min(1, 2), 1);
+                assertEqual(min(2, 1), 1);
+            });
+        });
+
+        t.describe("max", proc(t) {
+            t.it("works", proc() {
+                assertEqual(max(1, 2), 2);
+                assertEqual(max(2, 1), 2);
+            });
+        });
+
+        t.describe("sign", proc(t) {
+            t.it("works", proc() {
+                assertEqual(sign(-0.2), -1);
+                assertEqual(sign(0), 0);
+                assertEqual(sign(0.2), 1);
+            });
+        });
+
+        t.describe("randInt", proc(t) {
+            t.it("works", proc() {
+                for i in 1 to 10 {
+                    final j = randInt(1, 10);
+                    assertType(j, "int");
+                    assert(j >= 1 && j <= 10);
+                }
+            });
+        });
+
+        t.describe("randFloat", proc(t) {
+            t.it("works", proc() {
+                for i in 1 to 10 {
+                    final j = randFloat();
+                    assert(j >= 0 && j < 1);
+                }
+            });
+        });
+
+        t.describe("randBool", proc(t) {
+            t.it("works", proc() {
+                for i in 1 to 5  assertType(randBool(), "bool");
+            });
+        });
+
+        t.describe("PI", proc(t) {
+            t.it("works", proc() {
+                assertEqual(toString(PI)[:3], "3.14");
+            });
+        });
+
+        t.describe("E", proc(t) {
+            t.it("works", proc() {
+                assertEqual(toString(E)[:3], "2.71");
+            });
+        });
+
+        t.describe("map", proc(t) {
+            t.it("works", proc() {
+                for i in 1 to 5  assertEqual(map(i, 1, 5, 10, 50), i * 10);
+            });
+        });
+
+        t.describe("lerp", proc(t) {
+            t.it("works", proc() {
+                assertEqual(lerp(0, 0, 10), 0);
+                assertEqual(lerp(0.5, 0, 10), 5);
+                assertEqual(lerp(1, 0, 10), 10);
+            });
+        });
+    });
+}

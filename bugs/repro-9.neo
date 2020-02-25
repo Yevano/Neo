@@ -1,0 +1,8 @@
+import "std/assert";
+
+exported proc main() {
+	var a = [];
+	for i in 1 to 5  		insert(a, i);
+	for i in 5 to 1 by -1  	insert(a, i);
+	assertDeepEqual(a, [ 1, 2, 3, 4, 5, 5, 4, 3, 2, 1 ]);
+}

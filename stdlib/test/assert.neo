@@ -1,0 +1,51 @@
+import "std/assert";
+
+exported proc test(t) {
+	t.describe("assert", proc(t) {
+		t.describe("assert", proc(t) {
+			t.it("does not throw if condition is true", 
+				proc() => assert(true));
+
+			t.it("throws if condition is false", 
+				proc() => assertEqual(catchException(proc() => assert(false)), "assertion failed"));
+		
+			t.it("throws if condition is false and includes custom error message", 
+				proc() => assertEqual(catchException(proc() => assert(false, "fish")), "assertion failed: fish"));
+		});
+
+		t.describe("assertNot", proc(t) {
+			t.it("does not throw if condition is false", 
+				proc() => assertNot(false));
+
+			t.it("throws if condition is true",
+				proc() => assertEqual(catchException(proc() => assertNot(true)), "assertion failed"));
+
+			t.it("throws if condition is true and includes custom error message", 
+				proc() => assertEqual(catchException(proc() => assertNot(true, "fish")), "assertion failed: fish"));
+		});
+
+		t.describe("assertThrows", proc(t) {
+			t.it("does not throw if an exception is thrown", 
+				proc() => assertThrows(proc() => assert(false)));
+			
+			t.it("throws if no exception is thrown", 
+				proc() => assertThrows(proc() => assertThrows(proc() => assert(true))));	
+		});
+
+		t.describe("assertType", proc(t) {
+			t.it("does not throw if the right type is provided", 
+				proc() => assertType(42.5, "float"));	
+			
+			t.it("throws if the wrong type is provided", 
+				proc() => assertEqual(catchException(proc() => assertType({}, "int")), "assertion failed: got type 'object', expected 'int'; value: {}"));
+		});
+
+		t.describe("assertEqual", proc(t) {
+			t.it("does not throw if the arguments are equal", 
+				proc() => assertEqual(5, 5));
+
+			t.it("throws if the arguments are not equal",
+				proc() => assertEqual(catchException(proc() => assertEqual(4, 2)), "assertion failed: expected '4' to equal '2'"));	
+		});
+	});
+}

@@ -1,0 +1,83 @@
+import "std/math" as math;
+import "std/assert";
+
+exported proc BitSet() {
+	final self = {};
+
+	final slots = [];
+
+	proc ensureSlotExists(slot) {
+		while slot >= #slots  insert(slots, 0);
+	}
+
+	self.slots = proc() => #slots;
+
+	self.getSlots = proc() => slots;
+
+	self.capacity = proc() => #slots << 5;
+
+	self.get = proc(idx) {
+		assert(idx >= 0);
+
+		final slot = idx >> 5;
+		ensureSlotExists(slot);
+
+		return (slots[slot] & (1 << (idx & 0x1F))) != 0;
+	};
+
+	self.set = proc(idx) {
+		assert(idx >= 0);
+
+		final slot = idx >> 5;
+		ensureSlotExists(slot);
+
+		slots[slot] |= 1 << (idx & 0x1F);
+	};
+
+	self.clear = proc(idx) {
+		assert(idx >= 0);
+
+		final slot = idx >> 5;
+		ensureSlotExists(slot);
+
+		slots[slot] &= ~(1 << (idx & 0x1F));
+	};
+
+	self.firstSetBit = proc() {
+		final cap = self.capacity() - 1;
+		for i in 0 to cap  if self.get(i)  return i;
+		return -1;
+	};
+
+	self.firstClearBit = proc() {
+		final cap = self.capacity() - 1;
+		for i in 0 to cap  if !self.get(i)  return i;
+		return -1;
+	};
+
+	self.lastSetBit = proc() {
+		final cap = self.capacity() - 1;
+		for i in 0 to cap  if self.get(cap - i)  return cap - i;
+		return -1;
+	};
+
+	self.lastClearBit = proc() {
+		final cap = self.capacity() - 1;
+		for i in 0 to cap  if !self.get(cap - i)  return cap - i;
+		return -1;
+	};
+
+	self.and = proc(other) {
+		throw "not yet implemented"; // @TODO
+	};
+
+	self.or = proc(other) {
+		throw "not yet implemented"; // @TODO
+	};
+
+	self.xor = proc(other) {
+		throw "not yet implemented"; // @TODO
+	};
+
+	return frozen self;
+}

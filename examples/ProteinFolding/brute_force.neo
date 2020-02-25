@@ -1,0 +1,54 @@
+exported proc Folder(protein) {
+    var cur = protein;
+
+    proc fold() {
+        var best = cur;
+        var bestScore = cur.score();
+
+        var queue = [];
+
+        proc search(i, r, c) {
+            insert(queue, {
+                index = i,
+                row = r,
+                col = c
+            });
+        }
+
+        proc pop() {
+            var index = #queue - 1;
+            var element = queue[index];
+            remove(queue, index);
+            return element;
+        }
+
+        search(0, protein.length() - 1, protein.length() - 1);
+
+        while #queue > 0 {
+            var item = pop();
+            var index = item.index;
+            var row = item.row;
+            var col = item.col;
+
+            cur.setLocation(index, row, col);
+            if index >= protein.length() - 1 {
+                var score = cur.score();
+                if score > bestScore {
+                    bestScore = score;
+                    best = cur.clone();
+                }
+            } else {
+                if !cur.occupied(row + 1, col)  search(index + 1, row + 1, col    );
+                if !cur.occupied(row, col + 1)  search(index + 1, row,     col + 1);
+                if !cur.occupied(row - 1, col)  search(index + 1, row - 1, col    );
+                if !cur.occupied(row, col - 1)  search(index + 1, row,     col - 1);
+            }
+        }
+
+        return best;
+    }
+
+    return frozen {
+        fold = fold
+    };
+}

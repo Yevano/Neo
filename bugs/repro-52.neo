@@ -1,0 +1,17 @@
+import "std/assert";
+
+final fn;
+
+proc __init() {
+	final a = 42;
+
+	fn = proc() {
+		assertEqual(a, 42);
+	};
+
+	fn();
+}
+
+exported proc main() {
+	fn();
+}

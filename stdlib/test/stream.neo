@@ -1,0 +1,45 @@
+import "std/stream" as stream;
+import "std/assert";
+
+exported proc test(t) {
+    t.describe("stream", proc(t) {
+        t.describe("fromArray,of,toArray", proc(t) {
+            t.it("works", proc() {
+                final a = stream.of(1, 2, 3, 4).toArray();
+                for i in 1 to 4  assertEqual(a[i - 1], i);
+            });
+        });
+
+        t.describe("filter", proc(t) {
+            t.it("works", proc() {
+                final a = stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                                .filter(proc(x) => x % 2 == 0)
+                                .toArray();
+
+                assertEqual(#a, 5);
+                for i in 0 to #a - 1  assertEqual(a[i], (i + 1) * 2);
+            });
+        });
+
+        t.describe("limit", proc(t) {
+            t.it("works", proc() {
+                final a = stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                                .limit(5)
+                                .toArray();
+
+                assertEqual(#a, 5);
+                for i in 1 to 5  assertEqual(a[i - 1], i);
+            });
+        });
+
+        t.describe("skip", proc(t) {
+            t.it("works", proc() {
+                final a = stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                                .skip(5)
+                                .toArray();
+                    
+                for i in 6 to 10  assertEqual(a[i - 6], i);
+            });
+        });
+    });
+}

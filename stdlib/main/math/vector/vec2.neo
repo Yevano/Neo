@@ -1,0 +1,28 @@
+import "std/math" as math;
+
+final Vec2MetaObject;
+
+proc __init() {
+    Vec2MetaObject = {
+        __add = proc(self, other) => Vec2(self.x + other.x, self.y + other.y),
+        __sub = proc(self, other) => Vec2(self.x - other.x, self.y - other.y),
+        __mul = proc(self, other) => Vec2(self.x * other, self.y * other),
+        __div = proc(self, other) => Vec2(self.x / other, self.y / other),
+        __neg = proc(self) => Vec2(-self.x, -self.y),
+        __equals = proc(self, other, deep) => self.x == other.x &&
+                                              self.y == other.y,               
+        __length = proc() => math.sqrt(self.x ** 2 + self.y ** 2),
+        __tostring = proc(self) => $"({self.x}, {self.y})"
+    };
+}
+
+exported proc Vec2(x, y) {
+    final self = {
+        x = x,
+        y = y
+    };
+
+    self.normalize = proc() => self.scale(1 / self.length());
+
+    return frozen setMetaObject(self, Vec2MetaObject);
+}

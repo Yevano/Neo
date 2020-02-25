@@ -1,0 +1,68 @@
+import "std/string" as string;
+import "std/assert";
+
+exported proc test(t) {
+    t.describe("string", proc(t) {
+        t.describe("byte", proc(t) {
+            t.it("works", proc() {
+                assertEqual(string.byte(" "), 32);
+                assertEqual(string.byte("A"), 65);
+            });
+        });
+
+        t.describe("char", proc(t) {
+            t.it("works", proc() {
+                assertEqual(string.char(32), " ");
+                assertEqual(string.char(65), "A");
+            });
+        });
+
+        t.describe("lower", proc(t) {
+            t.it("works", proc() {
+                assertEqual(string.lower("TeSt"), "test");
+            });
+        });
+
+        t.describe("upper", proc(t) {
+            t.it("works", proc() {
+                assertEqual(string.upper("TeSt"), "TEST");
+            });
+        });
+
+        t.describe("split", proc(t) {
+            t.it("works", proc() {
+                var parts = string.split("t.e.s.t", ".");
+
+                assertEqual(#parts, 4);
+                assertEqual(parts[0], "t");
+                assertEqual(parts[1], "e");
+                assertEqual(parts[2], "s");
+                assertEqual(parts[3], "t");
+            });
+        });
+
+        t.describe("padLeft", proc(t) {
+        	t.it("works when no padding is needed", proc() {
+        		assertEqual(string.padLeft(" 3.14", 5), " 3.14");
+        		assertEqual(string.padLeft("_3.14", 5, "_"), "_3.14");
+        	});
+
+        	t.it("works when padding is needed", proc() {
+        		assertEqual(string.padLeft("3.14", 5), " 3.14");
+        		assertEqual(string.padLeft("3.14", 5, "_"), "_3.14");
+    		});
+    	});
+
+    	t.describe("padRight", proc(t) {
+        	t.it("works when no padding is needed", proc() {
+        		assertEqual(string.padLeft("3.14 ", 5), "3.14 ");
+        		assertEqual(string.padLeft("3.140", 5, "0"), "3.140");
+        	});
+
+        	t.it("works when padding is needed", proc() {
+        		assertEqual(string.padRight("3.14", 5), "3.14 ");
+        		assertEqual(string.padRight("3.14", 5, "0"), "3.140");
+    		});
+    	});
+    });
+}

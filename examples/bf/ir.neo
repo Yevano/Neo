@@ -1,0 +1,120 @@
+exported enum OpCode {
+    RIGHT,
+    LEFT,
+    ADD,
+    SUB,
+    OPEN,
+    CLOSE,
+    SET,
+    WRITE,
+    READ
+}
+
+exported proc parse(code) {
+	var instructions = [];
+
+    proc emit(op, operand) {
+        final insn = { op = op };
+        if operand != nil  insn.operand = operand;
+        insert(instructions, insn);
+    }
+
+    for i in 0 to #code - 1 {
+        var c = code[i];
+        if c == ">"  emit(OpCode.RIGHT, 1);
+        else if c == "<"  emit(OpCode.LEFT, 1);
+        else if c == "+"  emit(OpCode.ADD, 1);
+        else if c == "-"  emit(OpCode.SUB, 1);
+        else if c == "["  emit(OpCode.OPEN);
+        else if c == "]"  emit(OpCode.CLOSE);
+        else if c == "."  emit(OpCode.WRITE, 1);
+        else if c == ","  emit(OpCode.READ, 1);
+    }
+
+    return instructions;
+}
+
+exported proc computeJumpTable(ir) {
+    var jump_table = {};
+
+    var stack = [];
+
+    proc push(e) {
+        insert(stack, e);
+    }
+
+    proc pop() {
+        var i = #stack - 1;
+        var e = stack[i];
+        remove(stack, i);
+        return e;
+    }
+
+    for i in 0 to #ir - 1 {
+        var c = ir[i];
+        if c.op == OpCode.OPEN {
+            push(i);
+        } else if c.op == OpCode.CLOSE {
+            var s = pop();
+            jump_table[s] = i;
+            jump_table[i] = s;
+        }
+    }
+
+    return jump_table;
+}
+
+exported proc contract(ir) {
+	var instructions = [];
+
+    proc emit(instruction) => insert(instructions, instruction)
+
+    var i = 0;
+    while i < #ir {
+        var instruction = ir[i];
+        var op = instruction.op;
+        if i < #ir - 1 && (op == OpCode.ADD || op == OpCode.SUB || op == OpCode.LEFT || op == OpCode.RIGHT) {
+            var count = 1;
+            while i < #ir && ir[i + 1].op == op {
+                i += 1;
+                count += 1;
+            }
+
+            emit({
+                op = op,
+                operand = count
+            });
+
+            i += 1;
+        } else {
+            emit(instruction);
+            i += 1;
+        }
+    }
+
+    return instructions;
+}
+
+exported proc removeClearLoops(ir) {
+	var instructions = [];
+
+    proc emit(instruction) => insert(instructions, instruction)
+
+    var i = 0;
+    while i < #ir {
+        var instruction = ir[i];
+        var op = instruction.op;
+        if i < #ir - 2 && op == OpCode.OPEN && ir[i + 1].op == OpCode.SUB && ir[i + 2].op == OpCode.CLOSE {
+            emit({
+                op = OpCode.SET,
+                operand = 0
+            });
+            i += 3;
+        } else {
+            emit(instruction);
+            i += 1;
+        }
+    }
+
+    return ir;
+}

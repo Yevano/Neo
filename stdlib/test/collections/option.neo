@@ -1,0 +1,26 @@
+import "std/assert";
+import "std/collections/option";
+
+exported proc test(t) {
+    t.describe("Option", proc(t) {
+        t.it("works", proc() {
+            var o = Option();
+
+            assert(!o.has());
+
+            o.set(42);
+
+            assert(o.has());
+            assert(o.get() == 42);
+
+            o.set(24);
+
+            assert(o.has());
+            assert(o.get() == 24);
+
+            o.remove();
+
+            assert(!o.has());
+        });
+    });
+}

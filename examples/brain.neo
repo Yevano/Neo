@@ -1,0 +1,100 @@
+#!/usr/bin/env neo
+
+import "std/math" as math;
+
+enum State {
+	LIVE,
+	DYING,
+	DEAD
+}
+
+final COLORS;
+
+proc __init() {
+	final colors = {};
+	colors[State.LIVE] = "\u001B[44m";
+	colors[State.DYING] = "\u001B[47m";
+	colors[State.DEAD] = "\u001B[40m";
+	COLORS = frozen colors;
+}
+
+proc Grid(width, height, r) {
+	if r == nil  r = 0.5;
+
+	final grid = [];
+	for i in 1 to width * height  insert(grid, math.randFloat() < r ? State.LIVE : State.DEAD);
+
+	proc countNeighbors(x, y, state) {
+		var count = 0;
+
+		for j in -1 to 1 {
+			for i in -1 to 1 {
+				if i == 0 && j == 0  continue;
+
+				var k = x + i;
+				var l = y + j;
+				k += width;
+				k %= width;
+				l += height;
+				l %= height;
+
+				if grid[k + l * width] == state  count += 1;
+			}
+		}
+
+		return count;
+	}
+
+	proc update() {
+		final new_grid = [];
+		for i in 1 to width * height  insert(new_grid, 0);
+
+		for y in 0 to height - 1 {
+			for x in 0 to width - 1 {
+				final index = x + y * width;
+
+				if grid[index] == State.LIVE {
+					new_grid[index] = State.DYING;
+				} else if grid[index] == State.DYING {
+					new_grid[index] = State.DEAD;
+				} else {
+					new_grid[index] = countNeighbors(x, y, State.LIVE) == 2 ? State.LIVE : State.DEAD;
+				} 
+			}
+		}
+
+		grid = new_grid;
+	}
+
+	proc draw() {
+		var s = "\u001B[2J\u001B[;H";
+
+		for y in 0 to height - 1 {
+			for x in 0 to width - 1 {
+				s ..= COLORS[grid[x + y * width]];
+				s ..= " ";
+			}
+			s ..= "\n";
+		}
+
+		write(s .. "\u001B[0m");
+	}
+
+	return frozen {
+		width = width,
+		height = height,
+		update = update,
+		draw = draw
+	};
+}
+
+proc main(args) {
+	final grid = Grid(60, 30, 0.1);
+
+	grid.draw();
+
+	while true {
+		grid.update();
+		grid.draw();
+	}
+}

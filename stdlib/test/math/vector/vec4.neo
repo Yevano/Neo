@@ -1,0 +1,95 @@
+import "std/math/vector/vec4";
+import "std/assert";
+
+exported proc test(t) {
+    t.describe("Vec4", proc(t) {
+        t.describe("add", proc(t) {
+            t.it("works", proc() {
+                final a = Vec4(1, 4, 9, 2);
+                final b = Vec4(9, 1, 4, 2);
+
+                final c = a + b;
+                
+                assertEqual(c.x, 10);
+                assertEqual(c.y, 5);
+                assertEqual(c.z, 13);
+                assertEqual(c.w, 4);
+            });
+        });
+
+        t.describe("sub", proc(t) {
+            t.it("works", proc() {
+                final a = Vec4(1, 4, 9, 2);
+                final b = Vec4(9, 1, 4, 2);
+
+                final c = a - b;
+                
+                assertEqual(c.x, -8);
+                assertEqual(c.y, 3);
+                assertEqual(c.z, 5);
+                assertEqual(c.w, 0);
+            });
+        });
+
+        t.describe("mul", proc(t) {
+            t.it("works", proc() {
+                final a = Vec4(3.5, 1, 2, 7);
+
+                final c = a * 2;
+
+                assertEqual(c.x, 7);
+                assertEqual(c.y, 2);
+                assertEqual(c.z, 4);
+                assertEqual(c.w, 14);
+            });
+        });
+
+        t.describe("div", proc(t) {
+            t.it("works", proc() {
+                final a = Vec4(6, 14, 2, 8);
+
+                final c = a / 2;
+
+                assertEqual(c.x, 3);
+                assertEqual(c.y, 7);
+                assertEqual(c.z, 1);
+                assertEqual(c.w, 4);
+            });
+        });
+
+        t.describe("neg", proc(t) {
+            t.it("works", proc() {
+                final a = Vec4(3, 12, -7, 4);
+
+                final c = -a;
+
+                assertEqual(c.x, -3);
+                assertEqual(c.y, -12);
+                assertEqual(c.z, 7);
+                assertEqual(c.w, -4);
+            });
+        });
+
+        t.describe("equals", proc(t) {
+            t.it("works when two Vec4s are equal", proc() {
+                final a = Vec4(3, 7, 12, 4);
+                final b = Vec4(3, 7, 12, 4);
+                assertEqual(a, b);
+                assertDeepEqual(a, b);
+            });
+            
+            t.it("works when two Vec4s are not equal", proc() {
+                final a = Vec4(3, 7, 12, 4);
+                final b = Vec4(3, 6, 12, 4);
+                assertNotEqual(a, b);
+                assertNotDeepEqual(a, b);
+            });
+        });
+
+        t.describe("tostring", proc(t) {
+            t.it("works", proc() {
+                assertEqual("" .. Vec4(3.5, 7, 12, 4.2), "(3.5, 7, 12, 4.2)");    
+            });
+        });
+    });
+}

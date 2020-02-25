@@ -1,0 +1,199 @@
+import "std/math" as math;
+import "std/string" as string;
+
+var MIN = -1000000000;
+var MAX =  1000000000;
+
+exported proc Protein(chain) {
+    var row = [];
+    var col = [];
+    var cached_score = -1;
+
+    for i in 0 to #chain - 1 {
+        insert(row, 0);
+        insert(col, i);
+    }
+
+    proc isHydrophobic(index) => chain[index] == "H"
+    proc getRow(index) => row[index]
+    proc getCol(index) => col[index]
+
+    proc occupied(r, c) {
+        for i in 0 to #chain - 1 {
+            if row[i] == r && col[i] == c {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    proc setLocation(index, r, c) {
+        row[index] = r;
+        col[index] = c;
+        cached_score = -1;
+    }
+
+    proc clone() {
+        var p = Protein(chain);
+        for i in 0 to #chain - 1  p.setLocation(i, getRow(i), getCol(i));
+        return p;
+    }
+    
+    proc score() {
+        if cached_score != -1  return cached_score; 
+
+        var ret = 0;
+        var length = #chain;
+        
+        for i in 1 to length - 1 {
+            var dx = math.abs(col[i] - col[i - 1]);
+            var dy = math.abs(row[i] - row[i - 1]);
+            if dx + dy != 1  return MIN;
+        }
+
+        for i in 0 to length - 1 {
+            var r0 = row[i];
+            var c0 = col[i];
+            for j in i + 1 to length - 1 {
+                var r1 = row[j];
+                var c1 = col[j];
+                
+                if r0 == r1 && c0 == c1  return MIN;
+
+                if isHydrophobic(i) && isHydrophobic(j) {
+                    if r0 == r1 {
+                        if c0 == c1 + 1 || c1 == c0 + 1  ret += 1;
+                    } else if c0 == c1 {
+                        if r0 == r1 + 1 || r1 == r0 + 1  ret += 1;
+                    }
+                }
+            }
+        }
+
+        cached_score = ret;
+
+        return ret;
+    }
+
+    proc write(writer) {
+        var minRow = MAX;
+        var maxRow = MIN;
+        var minCol = MAX;
+        var maxCol = MIN;
+        
+        for i in 0 to #chain - 1 {
+            if row[i] < minRow  minRow = row[i];
+            if row[i] > maxRow  maxRow = row[i];
+            if col[i] < minCol  minCol = col[i];
+            if col[i] > maxCol  maxCol = col[i];
+        }
+
+        var grid = [];
+        for x in 0 to maxRow - minRow {
+            insert(grid, []);
+
+            for y in 0 to maxCol - minCol {
+                insert(grid[x], 0);
+            }
+        }
+
+        var r0 = row[0] - minRow;
+        var c0 = col[0] - minCol;
+        grid[r0][c0] = 4;
+        for i in 1 to #chain - 1 {
+            var r1 = row[i] - minRow;
+            var c1 = col[i] - minCol;
+            grid[r1][c1] += 4 * (i + 1);
+
+            if r0 == r1 {
+                if c1 == c0 + 1  grid[r0][c0] += 1;
+                else if c0 == c1 + 1  grid[r1][c1] += 1;
+            } else {
+                if r1 == r0 + 1  grid[r0][c0] += 2;
+                else if r0 == r1 + 1  grid[r1][c1] += 2;
+            }
+
+            r0 = r1;
+            c0 = c1;
+        }
+
+        for i in 0 to #grid - 1 {
+            for j in 0 to #grid[0] - 1 {
+                var k = grid[i][j];
+                var pos = int(k / 4 - 1);
+
+                if pos < 0  writer(" ");
+                else if pos == 0  writer(string.lower(chain[pos]));
+                else if pos < #chain  writer(chain[pos]);
+                else  writer("?");
+
+                if j < #grid[0] - 1 {
+                    if k % 2 == 1  writer("--");
+                    else  writer("  ");
+                }
+            }
+
+            writer("\n");
+
+            if i < #grid - 1 {
+                for j in 0 to #grid[0] - 1 {
+                    if grid[i][j] % 4 >= 2  writer("|");
+                    else  writer(" ");
+
+                    if j < #grid[0] - 1  writer("  ");
+                }
+
+                writer("\n");
+            }
+        }
+    }
+
+    proc writePacked(writer) {
+        var minRow = MAX;
+        var maxRow = MIN;
+        var minCol = MAX;
+        var maxCol = MIN;
+        
+        for i in 0 to #chain - 1 {
+            if row[i] < minRow  minRow = row[i];
+            if row[i] > maxRow  maxRow = row[i];
+            if col[i] < minCol  minCol = col[i];
+            if col[i] > maxCol  maxCol = col[i];
+        }
+
+        var grid = [];
+        for x in 0 to maxRow - minRow {
+            insert(grid, []);
+
+            for y in 0 to maxCol - minCol {
+                insert(grid[x], " ");
+            }
+        }
+
+        for i in 0 to #chain - 1 {
+            var r = getRow(i) - minRow;
+            var c = getCol(i) - minCol;
+            grid[r][c] = isHydrophobic(i) ? (i == 0 ? "h" : "H") : (i == 0 ? "p" : "P");
+        }
+
+        for x in 0 to #grid - 1 {
+            for y in 0 to #grid[0] - 1 {
+                writer(grid[x][y]);
+            }
+            writer("\n");
+        }
+    }
+
+    return frozen {
+        isHydrophobic = isHydrophobic,
+        occupied = occupied,
+        getRow = getRow,
+        getCol = getCol,
+        setLocation = setLocation,
+        clone = clone,
+        score = score,
+        write = write,
+        writePacked = writePacked,
+        length = proc() => #chain
+    };
+}

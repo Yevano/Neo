@@ -1,0 +1,105 @@
+import "std/string" as string;
+import "std/assert";
+
+final toB64;
+final fromB64;
+
+proc __init() {
+	final table = [
+		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+		"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"
+	];
+
+	var _to = {};
+	var _from = { ["="] = 0 };
+
+	for i in 0 to #table - 1 {
+		var c = table[i];
+		_to[i] = c;
+		_from[c] = i;
+		assert(c == table[i]);
+	}
+
+	toB64 = frozen _to;
+	fromB64 = frozen _from;
+}
+
+exported proc encode(data) {
+	assert(type(data) == "array");
+
+	if(data == "") return "";
+
+	proc encodeBlock(offset) {
+		final slack = #data - offset - 1;
+		final end = (slack >= 2) ? 2 : slack;
+		
+		var block = 0;
+
+		for i in 0 to end {
+			final b = data[offset + i];
+			final n = (b < 0) ? b + 0x100 : b;
+			block += n << (8 * (2 - i));
+		}
+
+		var r = "";
+		for i in 0 to 3  r ..= toB64[(block >> (6 * (3 - i))) & 0x3F];
+
+		if slack < 1 r = r[:1] .. "=" .. r[3:];
+		if slack < 2 r = r[:2] .. "=";
+
+		return r;
+	}
+
+	var encoded = "";
+	for i in 0 to #data - 1 by 3  encoded ..= encodeBlock(i);
+	return encoded;
+}
+
+exported proc decode(data) {
+	assert(type(data) == "string");
+
+	if(data == "") return "";
+
+	var pad = 0;
+	var i = #data - 1;
+	while data[i] == "=" {
+		i -= 1;
+		pad += 1;
+	}	
+
+	final length = #data * 6 / 8 - pad;
+	var raw = [];
+	var j = 0;
+
+	for k in 0 to #data - 1 by 4 {
+		final block = (fromB64[data[k]] << 18) +
+		 			  (fromB64[data[k + 1]] << 12) +
+		 			  (fromB64[data[k + 2]] << 6) +
+		 			  fromB64[data[k + 3]];
+
+		var l = 0;
+		while l < 3 && j + l < length {
+			insert(raw, (block >> (8 * (2 - l))) & 0xFF);
+			l += 1;
+		}
+		j += 3;
+	}
+
+	return raw;
+}
+
+exported proc encodeString(data) {
+	assert(type(data) == "string");
+
+	var bytes = [];
+	for i in 0 to #data - 1  insert(bytes, string.byte(data[i]));
+	return encode(bytes);
+}
+
+exported proc decodeString(data) {
+	final decoded = decode(data);
+	var result = "";
+	for i in 0 to #decoded - 1  result ..= string.char(decoded[i]);
+	return result;
+}

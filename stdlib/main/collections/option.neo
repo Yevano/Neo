@@ -1,0 +1,23 @@
+exported proc Option() {
+    var data;
+    var has = false;
+
+    return frozen {
+        set = proc(v) {
+            data = v;
+            has = true;
+        },
+        remove = proc() {
+            data = nil;
+            has = false;
+        },
+        get = proc() {
+            if !has  throw "Option is empty";
+            return data;
+        }, 
+        has = proc() => has,
+        ifPresent = proc(fn) {
+            if has  fn(data);
+        }
+    };
+}

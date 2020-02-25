@@ -1,0 +1,36 @@
+import "std/math" as math;
+
+import "../ANSIShader/Shader";
+import "../ANSIShader/ShaderProgram";
+import "../ANSIShader/FrameBuffer";
+
+final MAX = 3;
+
+exported proc ansi_shader_test() {
+	final fb = FrameBuffer(50, 20);
+        
+    final program = ShaderProgram();
+
+    final shader = Shader(proc(pixel, x, y, inputs) {
+        final res = inputs[0];
+        final t = inputs[1];
+        final u = x / res.width;
+        final v = y / res.height;
+
+        pixel.red = math.lerp(v, math.cos(t), math.sin(t));
+        pixel.green = v;
+        pixel.blue = math.lerp(u, math.sin(t), math.cos(t));
+    });
+    program.addShader(shader);
+
+    final res = shader.addInput();
+    final t = shader.addInput();
+    shader.setInput(res, { width = fb.width, height = fb.height });
+
+    for i in 0 to MAX by 0.1 {
+        shader.setInput(t, i);
+
+        program.apply(fb);
+        fb.draw();
+    }
+}

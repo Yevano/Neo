@@ -1,0 +1,30 @@
+import "std/math" as math;
+
+final Vec3MetaObject;
+
+proc __init() {
+    Vec3MetaObject = {
+        __add = proc(self, other) => Vec3(self.x + other.x, self.y + other.y, self.z + other.z),
+        __sub = proc(self, other) => Vec3(self.x - other.x, self.y - other.y, self.z - other.z),
+        __mul = proc(self, other) => Vec3(self.x * other, self.y * other, self.z * other),
+        __div = proc(self, other) => Vec3(self.x / other, self.y / other, self.z / other),
+        __neg = proc(self) => Vec3(-self.x, -self.y, -self.z),
+        __equals = proc(self, other, deep) => self.x == other.x &&
+                                            self.y == other.y &&
+                                            self.z == other.z,    
+        __length = proc() => math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2),
+        __tostring = proc(self) => $"({self.x}, {self.y}, {self.z})"
+    };
+}
+
+exported proc Vec3(x, y, z) {
+    final self = {
+        x = x,
+        y = y,
+        z = z
+    };
+
+    self.normalize = proc() => self.scale(1 / self.length());
+
+    return frozen setMetaObject(self, Vec3MetaObject);
+}

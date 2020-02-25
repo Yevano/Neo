@@ -1,0 +1,103 @@
+import "std/assert";
+
+exported proc test(t) {
+    t.describe("base", proc(t) {
+        t.describe("getMetaObject/setMetaObject", proc(t) {
+            t.it("work", proc() {
+                var o = {};
+
+                assertEqual(getMetaObject(o), nil);
+
+                var mo = {};
+
+                setMetaObject(o, mo);
+
+                assertEqual(getMetaObject(o), mo);
+            });
+        });
+
+        t.describe("type", proc(t) {
+            t.it("works", proc() {
+                assertEqual(type(42), "int");
+                assertEqual(type(3.14), "float");
+                assertEqual(type(true), "bool");
+                assertEqual(type(nil), "nil");
+                assertEqual(type({}), "object");
+                assertEqual(type([]), "array");
+                assertEqual(type(proc() {}), "procedure");
+            });
+        });
+        
+        t.describe("toString", proc(t) {
+            t.it("works", proc() {
+                assertEqual(toString(42), "42");
+                assertEqual(toString(3.14), "3.14");
+                assertEqual(toString(true), "true");
+                assertEqual(toString(nil), "nil");
+                assertEqual(toString({ a = 5 }), "{ a = 5 }");
+                assertEqual(toString([ 4 ]), "[ 4 ]");
+                assertEqual(toString(proc() {}), "procedure");
+            });
+        });
+
+        t.describe("int", proc(t) {
+            t.it("works", proc() {
+                assertEqual(int(42), 42);
+                assertEqual(int(6.28), 6);
+                assertEqual(int(9.8), 9);
+            });
+        });
+
+        t.describe("float", proc(t) {
+            t.it("works", proc() {
+                assertEqual(float(42), 42.0);
+                assertEqual(float(3.14), 3.14);
+                assertEqual(float(9.888), 9.888);
+            });
+        });
+
+        t.describe("parseNumber", proc(t) {
+            t.it("works", proc() {
+                assertEqual(parseNumber("42"), 42);
+                assertEqual(parseNumber("3.14"), 3.14);
+            });
+        });
+
+        t.describe("insert", proc(t) {
+            t.it("works", proc() {
+                var a = [];
+
+                insert(a, 42);
+                insert(a, 3.14);
+
+                assertEqual(#a, 2);
+                assertEqual(a[0], 42);
+                assertEqual(a[1], 3.14);
+            });
+        });
+
+        t.describe("remove", proc(t) {
+            t.it("works", proc() {
+                var a = [ 5, 10, 15 ];
+
+                remove(a, 1);
+
+                assertEqual(#a, 2);
+                assertEqual(a[0], 5);
+                assertEqual(a[1], 15);
+            });
+        });
+    
+        t.describe("catchException", proc(t) {
+            t.it("returns the function's return value if no exception was thrown", proc() {
+                assertEqual(catchException(proc() => 5), 5);
+            });
+
+            t.it("returns the exception if one was thrown", proc() {
+                assertEqual(catchException(proc() {
+                    throw "fish";
+                }), "fish");
+            });
+        });
+    });
+}

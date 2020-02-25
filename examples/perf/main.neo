@@ -1,0 +1,47 @@
+import "std/ffi" as ffi;
+import "std/stream" as stream;
+import "std/string" as string;
+
+import "base64_test";
+import "ansi_shader_test";
+import "protein_fold_test";
+
+final native_DateTime;
+
+proc __init() {
+	native_DateTime = ffi.class("System.DateTime");
+}
+
+proc formatMillis(millis) => $"{int(millis / 1000)}.{int(millis % 1000)}s"
+
+proc main() {
+	final tests = {
+		base64_test = base64_test,
+		ansi_shader_test = ansi_shader_test,
+		protein_fold_test = protein_fold_test
+	};
+
+	final results = [];
+	var total = 0;
+	var maxNameLength = 0;
+
+	for name, fn in tests {
+		if #name > maxNameLength  maxNameLength = #name;
+
+		final start = native_DateTime.Now;
+		fn();
+		final diff = native_DateTime.Now.Subtract(start).TotalMilliseconds;
+		total += diff;
+
+		insert(results, [ name .. ": ", formatMillis(diff) ]);	
+	}
+ 		
+	write("\u001B[2J\u001B[;H");
+		
+	maxNameLength += 2;
+
+ 	stream.fromArray(results)
+ 		  .forEach(proc(a) => print(string.padRight(a[0], maxNameLength) .. a[1]));
+
+ 	print("\n" .. string.padRight("total:", maxNameLength) .. formatMillis(total));
+}

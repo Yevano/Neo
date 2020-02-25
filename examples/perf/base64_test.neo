@@ -1,0 +1,26 @@
+import "std/assert";
+import "std/encoding/base64" as base64;
+import "std/string" as string;
+import "std/stream" as stream;
+import "std/math" as math;
+
+final ITERATIONS = 256;
+final LENGTH = 256;
+
+exported proc base64_test() {
+	proc rand_string(len) => stream.generate(proc() => math.randInt(33, 126))
+								   .limit(len)
+								   .map(proc(n) => string.char(n))
+								   .reduce(proc(a, b) => a .. b)
+								   .get()
+
+	for i in 1 to ITERATIONS {
+		write("\u001B[2J\u001B[;H");
+		print($"base64: {i}/{ITERATIONS}");
+
+		final original = rand_string(128);
+		final encoded = base64.encodeString(original);
+		final decoded = base64.decodeString(encoded);
+		assertEqual(original, decoded);
+    }
+}

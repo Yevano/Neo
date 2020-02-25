@@ -1,0 +1,40 @@
+#!/usr/bin/env neo
+
+import "std/string" as string;
+import "std/io/file" as file;
+
+import "ir";
+
+final HEADER = "exported proc run(writer, reader){final data = [];for i in 1 to 30000  insert(data, 0);var data_pointer = 0;";
+
+proc main(args) {
+	if #args != 1 {
+		print("Usage: compiler <file>");
+		return;
+	}
+
+	final bf = file.readAllText(args[0]);
+	final ir = removeClearLoops(contract(parse(bf)));
+
+	var code = HEADER;
+
+	for insn in ir {
+		final c = insn.op;
+		final operand = insn.operand;
+
+		if c == OpCode.RIGHT  		code ..= "data_pointer += " .. operand .. ";";
+		else if c == OpCode.LEFT  	code ..= "data_pointer -= " .. operand .. ";";
+		else if c == OpCode.ADD  	code ..= "data[data_pointer] += " .. operand .. ";";
+		else if c == OpCode.SUB  	code ..= "data[data_pointer] -= " .. operand .. ";";
+		else if c == OpCode.OPEN  	code ..= "while data[data_pointer] != 0 {";
+		else if c == OpCode.CLOSE  	code ..= "}";
+		else if c == OpCode.SET  	code ..= "data[data_pointer] = " .. operand .. ";";
+		else if c == OpCode.WRITE  	code ..= "writer(data[data_pointer]);";
+		else if c == OpCode.READ  	code ..= "data[data_pointer] = reader();";
+	}
+
+	code ..= "}";
+
+	final c = loadstring(code);
+	c.run(proc(b) => write(string.char(b)), nil);
+}

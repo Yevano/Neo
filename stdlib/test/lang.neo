@@ -1,0 +1,743 @@
+import "std/assert";
+
+exported proc test(t) {
+    t.describe("lang", proc(t) {
+        t.describe("equality", proc(t) {
+            t.it("works", proc() {
+                assert(true == true);
+                assert(false == false);
+
+                assert(true != false);
+                assert(false != true);
+
+                assert(nil == nil);
+                assert(false != nil);
+
+                assert(1 == 1);
+                assert(3.14 == 3.14);
+                assert(1 != 2);
+            });
+        });
+
+        t.describe("comparison", proc(t) {
+            t.it("works", proc() {
+                assert(1 < 2);
+                assert(2 > 1);
+
+                assert(5 >= 5);
+                assert(10 <= 10);
+
+                assert(3.14 < 6.28);
+            });
+        });
+
+        t.describe("math", proc(t) {
+            t.it("works", proc() {
+                assertEqual(1 + 1, 2);
+                assertEqual(2 / 2, 1);
+                assertEqual(4 / 2, 2);
+                assertEqual(2 * 3, 6);
+                assertEqual(8 ** 2, 64);
+                assertEqual(2 ** 4, 16);
+                assertEqual(6 % 2, 0);
+                assertEqual(5 % 2, 1);
+            });
+        });
+
+        t.describe("increments", proc(t) {
+            t.describe("prefix", proc(t) {
+                t.it("works on ints", proc() {
+                    var a = 0;
+
+                    assertEqual(++a, 1);
+                    assertEqual(a, 1);
+                });
+
+                t.it("works on floats", proc() {
+                    var a = 0.5;
+
+                    assertEqual(++a, 1.5);
+                    assertEqual(a, 1.5);
+                });
+            });
+
+            t.describe("postfix", proc(t) {
+                t.it("works on ints", proc() {
+                    var a = 0;
+
+                    assertEqual(a++, 0);
+                    assertEqual(a, 1);            
+                });
+
+                t.it("works on floats", proc() {
+                    var a = 0.5;
+
+                    assertEqual(a++, 0.5);
+                    assertEqual(a, 1.5);
+                });
+            });
+        });
+
+        t.describe("decrements", proc(t) {
+            t.describe("prefix", proc(t) {
+                t.it("works on ints", proc() {
+                    var a = 0;
+
+                    assertEqual(--a, -1);
+                    assertEqual(a, -1);
+                });
+
+                t.it("works on floats", proc() {
+                    var a = 0.5;
+
+                    assertEqual(--a, -0.5);
+                    assertEqual(a, -0.5);
+                });
+            });
+
+            t.describe("postfix", proc(t) {
+                t.it("works on ints", proc() {
+                    var a = 0;
+
+                    assertEqual(a--, 0);
+                    assertEqual(a, -1);            
+                });
+
+                t.it("works on floats", proc() {
+                    var a = 0.5;
+
+                    assertEqual(a--, 0.5);
+                    assertEqual(a, -0.5);
+                });
+            });
+        });
+
+        t.describe("bitwise operators", proc(t) {
+            t.it("works", proc() {
+                assertEqual(1 << 1, 2);
+                assertEqual(1 << 2, 4);
+                assertEqual(1 << 3, 8);
+                assertEqual(8 >> 3, 1);
+                assertEqual(4 >> 2, 1);
+                assertEqual(2 >> 1, 1);
+
+                assertEqual((1 | 2), 3);
+                assertEqual((1 | 4), 5);
+
+                assertEqual((2 & 1), 0);
+                assertEqual((3 & 1), 1);
+
+                assertEqual(~-42, 41);
+                assertEqual(~41, -42);
+
+                assertEqual((1 ^ 3), 2);
+            });
+        });
+
+        t.describe("boolean operators", proc(t) {
+            t.it("works", proc() {
+                assert(true && true);
+                assert(!(true && false));
+                assert(!(false && true));
+                assert(true || false);
+                assert(false || true);
+                assert(!(false || false));
+            });
+        });
+
+        t.describe("variables", proc(t) {
+            t.it("works", proc() {
+                var a = 5;
+
+                assertEqual(a, 5);
+
+                a = 10;
+
+                assertEqual(a, 10);
+
+                a -= 7;
+
+                assertEqual(a, 3);
+            });
+        });
+
+        t.describe("objects", proc(t) {
+            t.it("works", proc() {
+                var o = {
+                    a = 5,
+                    b = 7
+                };
+
+                assertEqual(#o, 2);
+                assertEqual(o.a, 5);
+                assertEqual(o.b, 7);
+            });
+        });
+
+        t.describe("object deep equality", proc(t) {
+            t.it("works", proc() {
+                var oa = {
+                    a = 5,
+                    b = 7
+                };
+
+                var ob = {
+                    a = 5,
+                    b = 7
+                };
+
+                assertNotEqual(oa, ob);
+                assertDeepEqual(oa, ob);
+            });
+        });
+
+        t.describe("array deep equality", proc(t) {
+            t.it("works", proc() {
+                var aa = [ 1, 4, 9 ];
+                var ab = [ 1, 4, 9 ];
+
+                assertNotEqual(aa, ab);
+                assertDeepEqual(aa, ab);
+            });
+        });
+
+        t.describe("arrays", proc(t) {
+            t.it("works", proc() {
+                var a = [ 1, 2, 3 ];
+
+                assertEqual(#a, 3);
+                for i in 1 to 3  assertEqual(a[i - 1], i);
+            });
+        });
+
+        t.describe("array slicing", proc(t) {
+            t.it("works", proc() {
+                var a = [ 1, 2, 3, 4, 5 ];
+
+                var b = a[1:3];
+
+                assertEqual(#b, 3);
+                for i in 2 to 4  assertEqual(b[i - 2], i);
+            });
+        });
+
+        t.describe("string concatenation", proc(t) {
+            t.it("works", proc() {
+                assertEqual(("app" .. "le"), "apple");
+            });
+        });
+
+        t.describe("string indexing", proc(t) {
+            t.it("works", proc() {
+                var s = "12345";
+                for i in 1 to 5  assertEqual(s[i - 1], toString(i));
+            });
+        });
+
+        t.describe("string slicing", proc(t) {
+            t.it("works", proc() {
+                assertEqual("apple"[1:3], "ppl");
+            });
+        });  
+
+        t.describe("MetaObjects", proc(t) {
+            t.describe("__tostring", proc(t) {
+                t.it("works", proc() {
+                    var o = setMetaObject({}, { __tostring = proc(self) => "fish" });
+
+                    assertEqual("" .. o, "fish");
+                });
+            });
+
+            t.describe("__equals", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    final mt = {
+                        __equals = proc(self, other, deep) {
+                            got = true;
+                            assertNot(deep);
+                            assertEqual(self.x, other.x);                                
+                            return true;
+                        }
+                    };
+                    
+                    var a = setMetaObject({ x = 42 }, mt);
+                    var b = setMetaObject({ x = 42 }, mt);
+
+                    assertEqual(a, b); 
+                    assert(got);
+                });
+
+                t.it("works deeply", proc() {
+                    var got = false;
+
+                    final mt = {
+                        __equals = proc(self, other, deep) {
+                            got = true;
+                            assert(deep);
+                            assertEqual(self.x, other.x);                                
+                            return true;
+                        }
+                    };
+                    
+                    var a = setMetaObject({ x = 42 }, mt);
+                    var b = setMetaObject({ x = 42 }, mt);
+
+                    assertDeepEqual(a, b); 
+                    assert(got);
+                });
+            });
+
+            t.describe("__compare", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    final mt = {
+                        __compare = proc(self, other, deep) {
+                            got = true;
+                            return -1;
+                        }
+                    };
+                    
+                    var a = setMetaObject({ x = 1 }, mt);
+                    var b = setMetaObject({ x = 2 }, mt);
+
+                    assertAbove(a, b);
+                    assert(got);
+                });
+            });
+
+            t.describe("__get", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    final o = setMetaObject({}, {
+                        __get = proc(self, key) {
+                            if(key == "q")  return 42;
+                        }
+                    });
+
+                    assertEqual(o.q, 42);
+                });
+            });
+
+            t.describe("__set", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __set = proc(self, key, value) {
+                            got = true;
+                            assertEqual(key, "fish");
+                            assertEqual(value, 4);
+                        }
+                    });
+
+                    o.fish = 4;
+                    assert(got);
+                });
+            });
+
+            t.describe("__call", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __call = proc(self, ...) {
+                            got = true;
+                            assertDeepEqual(..., [ 42 ]);
+                        } 
+                    });
+
+                    o(42);
+                    assert(got);
+                });
+            });
+
+            t.describe("__add", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __add = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o + 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__sub", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __sub = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o - 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__mul", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __mul = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o * 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__div", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __div = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o / 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__pow", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __pow = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o ** 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__mod", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __mod = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o % 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__lsh", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __lsh = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o << 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__rsh", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __rsh = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o >> 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__bitnot", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __bitnot = proc(self) {
+                            got = true;
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(~o, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__bitand", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __bitand = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o & 42, o);
+                    assert(got); 
+                });
+            });
+
+            t.describe("__bitor", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __bitor = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o | 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__bitxor", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __bitxor = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o ^ 42, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__not", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __not = proc(self) {
+                            got = true;
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(!o, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__neg", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __neg = proc(self) {
+                            got = true;
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(-o, o);
+                    assert(got);
+                });
+            });
+
+            t.describe("__concat", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __concat = proc(self, other) {
+                            got = true;
+                            assertEqual(other, 42);
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(o .. 42, o);
+                    assert(got);
+                }); 
+            });
+
+            t.describe("__length", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __length = proc(self) {
+                            got = true;
+                            return 42;
+                        }    
+                    });
+
+                    assertEqual(#o, 42);
+                    assert(got);
+                });
+            });
+
+            t.describe("__slice", proc(t) {
+                t.it("works when start is specified", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __slice = proc(self, start, end) {
+                            got = true;
+                            assertEqual(start, 4);
+                            assertEqual(end, -1);
+                            return "fish";
+                        }
+                    });
+
+                    assertEqual(o[4:], "fish");
+                    assert(got);
+                });
+
+                t.it("works when start is specified and __length is implemented", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __length = proc() => 14,
+                        __slice = proc(self, start, end) {
+                            got = true;
+                            assertEqual(start, 4);
+                            assertEqual(end, 13);
+                            return "fish";
+                        }
+                    });
+
+                    assertEqual(o[4:], "fish");
+                    assert(got);
+                });
+
+                t.it("works when end is specified", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __slice = proc(self, start, end) {
+                            got = true;
+                            assertEqual(start, 0);
+                            assertEqual(end, 8);
+                            return "fish";
+                        }
+                    });
+
+                    assertEqual(o[:8], "fish");
+                    assert(got);
+                });
+
+                t.it("works when neither start nor end are specified", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __slice = proc(self, start, end) {
+                            got = true;
+                            assertEqual(start, 0);
+                            assertEqual(end, -1);
+                            return "fish";
+                        }
+                    });
+
+                    assertEqual(o[:], "fish");
+                    assert(got); 
+                });
+
+                t.it("works when neither start nor end are specified and __length is implemented", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __length = proc() => 14,
+                        __slice = proc(self, start, end) {
+                            got = true;
+                            assertEqual(start, 0);
+                            assertEqual(end, 13);
+                            return "fish";
+                        }
+                    });
+
+                    assertEqual(o[:], "fish");
+                    assert(got); 
+                });
+
+                t.it("works when start and end are specified", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __slice = proc(self, start, end) {
+                            got = true;
+                            assertEqual(start, 4);
+                            assertEqual(end, 8);
+                            return "fish";
+                        }
+                    });
+
+                    assertEqual(o[4:8], "fish");
+                    assert(got);
+                });
+            });
+
+            t.describe("__frozen", proc(t) {
+                t.it("works", proc() {
+                    var got = false;
+
+                    var o = setMetaObject({}, {
+                        __frozen = proc(self) {
+                            got = true;
+                            return self;
+                        }    
+                    });
+
+                    assertEqual(frozen o, o);
+                    assert(got);
+                });
+            });
+        });  
+    });
+}

@@ -1,0 +1,75 @@
+#!/usr/bin/env neo
+
+import "std/math" as math;
+
+proc create_grid(width, height) {
+    final grid = [];
+
+    for i in 0 to width * height - 1  insert(grid, math.randInt(0, 1) == 1);
+
+    proc count_neighbors(x, y) {
+        var count = 0;
+        for j in y - 1 to y + 1 {
+            for i in x - 1 to x + 1 {
+                if i == x && j == y  continue;
+                if i < 0 || j < 0 || i >= width - 1 || j >= height - 1  continue;
+                if grid[i + j * width]  count += 1;
+            }   
+        }
+        return count;
+    }
+
+    proc update() {
+        var new_grid = [];
+        for i in 0 to width * height - 1  insert(new_grid, false);
+
+        for y in 0 to height - 1 {
+            for x in 0 to width - 1 {
+                final neighbors = count_neighbors(x, y);
+                
+                var index = x + y * width;
+                if grid[index] {
+                    new_grid[index] = neighbors == 2 || neighbors == 3;
+                } else {
+                    new_grid[index] = neighbors == 3;
+                }
+            }
+        }
+        
+        grid = new_grid;
+    }
+
+    proc draw() {
+        var s = "\u001B[2J\u001B[;H";
+
+        for y in 0 to height - 1 {
+            for x in 0 to width - 1 {
+                s ..= grid[x + y * width] ? "\u001B[41m" : "\u001B[40m";
+                s ..= " ";
+            }
+            s ..= "\n"; 
+        }
+
+        s ..= "\u001B[0m";
+        
+        write(s);
+    }
+
+    return frozen {
+        width = width, 
+        height = height,
+        update = update,
+        draw = draw
+    };
+}
+
+proc main() {
+    var grid = create_grid(60, 30);
+
+    grid.draw();
+
+    while true {
+        grid.update();
+        grid.draw();
+    }
+}

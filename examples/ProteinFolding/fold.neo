@@ -1,0 +1,40 @@
+#!/usr/bin/env neo
+
+import "Protein";
+import "brute_force";
+import "utils";
+
+proc run(max) {
+    var i = 1;
+
+    while true {
+        final chain = makeChain(i);
+        final protein = Protein(chain);
+        final folder = Folder(protein);
+        final best = folder.fold();
+        final bestScore = best.score();
+
+        write("\u001B[2J\u001B[;H");
+
+        print("# " .. i);
+        print("Chain: " .. chain);
+        print("Length: " .. #chain);
+        print("Score: " .. bestScore);
+        print();
+        best.write(pretty_write);
+        print();
+        
+        print();
+        best.writePacked(pretty_write);
+        print();
+        
+        if max > 0 && i > max  return;
+
+        i += 1;
+    }
+}
+
+proc main(args) {
+    if #args == 1  run(parseNumber(args[0]));
+    else  run(-1);    
+}

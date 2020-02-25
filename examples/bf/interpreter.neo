@@ -1,0 +1,41 @@
+#!/usr/bin/env neo
+
+import "std/string" as string;
+import "std/io/file" as file;
+
+import "ir";
+
+proc main(args) {
+	if #args != 1 {
+		print("Usage: compiler <file>");
+		return;
+	}
+
+	final bf = file.readAllText(args[0]);
+	final ir = removeClearLoops(contract(parse(bf)));
+	final jumpTable = computeJumpTable(ir);
+
+	final data = [];
+	for i in 1 to 30000  insert(data, 0);
+
+	var data_pointer = 0;
+	var ip = 0;
+	
+	while ip < #ir {
+		final insn = ir[ip];
+		final op = insn.op;
+		final operand = insn.operand;
+
+		if op == OpCode.RIGHT  		data_pointer += operand;
+		else if op == OpCode.LEFT  	data_pointer -= operand;
+		else if op == OpCode.ADD  	data[data_pointer] += operand;
+		else if op == OpCode.SUB 	data[data_pointer] -= operand;
+		else if op == OpCode.OPEN 	{ if data[data_pointer] == 0  ip = jumpTable[ip]; }
+		else if op == OpCode.CLOSE 	{ if data[data_pointer] != 0  ip = jumpTable[ip]; }
+		else if op == OpCode.SET  	data[data_pointer] = operand;
+		else if op == OpCode.WRITE  write(string.char(data[data_pointer]));
+		else if op == OpCode.READ  	throw "not yet implemented";
+
+		ip += 1;
+	}
+}

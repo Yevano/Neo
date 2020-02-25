@@ -1,0 +1,6 @@
+import "std/assert";
+
+exported proc main() {
+	final a = [ "test" ];
+	assertEqual($"{a[0]}", "test");
+}

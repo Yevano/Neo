@@ -1,0 +1,45 @@
+import "std/test";
+
+import "lang" as lang;
+import "base" as base;
+import "string" as string;
+import "math" as math;
+import "stream" as stream;
+import "array" as array;
+import "assert" as assert;
+
+import "collections/bitset" as bitset;
+import "collections/option" as option;
+import "collections/stack" as stack;
+
+import "math/vector/vec2" as vec2;
+import "math/vector/vec3" as vec3;
+import "math/vector/vec4" as vec4;
+
+import "encoding/base64" as base64;
+
+exported proc run_suite() {
+	describe("std", proc(t) {
+        lang.test(t);
+        base.test(t);
+        string.test(t);
+        math.test(t);
+        stream.test(t);
+        array.test(t);
+        assert.test(t);
+
+        bitset.test(t);
+        option.test(t);
+        stack.test(t);
+
+        vec2.test(t);
+        vec3.test(t);
+        vec4.test(t);
+
+        base64.test(t);
+    });
+}
+
+proc main() {
+    run_suite();
+}

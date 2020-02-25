@@ -1,0 +1,11 @@
+import "std/assert";
+
+exported proc main() {
+	var o = {};
+	o["test"] = o;
+	assertEqual(toString(o), "{ test = { test = <already-seen> } }");
+
+	var a = [];
+	insert(a, a);
+	assertEqual(toString(a), "[ [ [already-seen] ] ]");
+}

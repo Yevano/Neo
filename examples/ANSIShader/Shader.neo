@@ -1,0 +1,15 @@
+exported proc Shader(shaderFunc) {
+    final inputs = [];
+    return frozen {
+        shaderFunc = shaderFunc,
+        inputs = inputs,
+        addInput = proc() {
+            final index = #inputs;
+            insert(inputs, nil);
+            return index;
+        },    
+        setInput = proc(i, v) {
+            inputs[i] = v;
+        }
+    };
+}

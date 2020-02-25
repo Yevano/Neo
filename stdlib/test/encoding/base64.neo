@@ -1,0 +1,59 @@
+import "std/encoding/base64";
+import "std/assert";
+
+exported proc test(t) {
+	final test_vectors = {
+		[""] = "",
+		["f"] = "Zg==",
+		["fo"] = "Zm8=",
+		["foo"] = "Zm9v",
+		["foob"] = "Zm9vYg==",
+		["fooba"] = "Zm9vYmE=",
+		["foobar"] = "Zm9vYmFy",
+		["any carnal pleasure."] ="YW55IGNhcm5hbCBwbGVhc3VyZS4=",
+		["any carnal pleasure"] = "YW55IGNhcm5hbCBwbGVhc3VyZQ==",
+		["any carnal pleasur"] = "YW55IGNhcm5hbCBwbGVhc3Vy",
+		["any carnal pleasu"] = "YW55IGNhcm5hbCBwbGVhc3U=",
+		["any carnal pleas"] = "YW55IGNhcm5hbCBwbGVhcw==",
+		["pleasure."] = "cGxlYXN1cmUu",
+		["leasure."] = "bGVhc3VyZS4=",
+		["easure."] = "ZWFzdXJlLg==",
+		["asure."] = "YXN1cmUu",
+		["sure."] = "c3VyZS4=",
+		["The FitnessGram Pacer Test is a multistage aerobic capacity test that progressively gets more difficult as it continues. The 20 meter pacer test will begin in 30 seconds. Line up at the start. The running speed starts slowly, but gets faster each minute after you hear this signal. beep A single lap should be completed each time you hear this sound. ding Remember to run in a straight line, and run as long as possible. The second time you fail to complete a lap before the sound, your test is over. The test will begin on the word start. On your mark, get ready, start."] = "VGhlIEZpdG5lc3NHcmFtIFBhY2VyIFRlc3QgaXMgYSBtdWx0aXN0YWdlIGFlcm9iaWMgY2FwYWNpdHkgdGVzdCB0aGF0IHByb2dyZXNzaXZlbHkgZ2V0cyBtb3JlIGRpZmZpY3VsdCBhcyBpdCBjb250aW51ZXMuIFRoZSAyMCBtZXRlciBwYWNlciB0ZXN0IHdpbGwgYmVnaW4gaW4gMzAgc2Vjb25kcy4gTGluZSB1cCBhdCB0aGUgc3RhcnQuIFRoZSBydW5uaW5nIHNwZWVkIHN0YXJ0cyBzbG93bHksIGJ1dCBnZXRzIGZhc3RlciBlYWNoIG1pbnV0ZSBhZnRlciB5b3UgaGVhciB0aGlzIHNpZ25hbC4gYmVlcCBBIHNpbmdsZSBsYXAgc2hvdWxkIGJlIGNvbXBsZXRlZCBlYWNoIHRpbWUgeW91IGhlYXIgdGhpcyBzb3VuZC4gZGluZyBSZW1lbWJlciB0byBydW4gaW4gYSBzdHJhaWdodCBsaW5lLCBhbmQgcnVuIGFzIGxvbmcgYXMgcG9zc2libGUuIFRoZSBzZWNvbmQgdGltZSB5b3UgZmFpbCB0byBjb21wbGV0ZSBhIGxhcCBiZWZvcmUgdGhlIHNvdW5kLCB5b3VyIHRlc3QgaXMgb3Zlci4gVGhlIHRlc3Qgd2lsbCBiZWdpbiBvbiB0aGUgd29yZCBzdGFydC4gT24geW91ciBtYXJrLCBnZXQgcmVhZHksIHN0YXJ0Lg=="
+	};
+
+	t.describe("base64", proc(t) {
+		t.describe("encode", proc(t) {
+			t.it("only accepts arrays", proc() {
+				assertThrows(proc() => encode({}));
+			});
+		});
+
+		t.describe("encode", proc(t) {
+			t.it("only accepts strings", proc() {
+				assertThrows(proc() => encode({}));
+			});
+		});
+
+		t.describe("encodeString", proc(t) {
+			t.it("only accepts strings", proc() {
+				assertThrows(proc() => encodeString({}));
+			});
+
+			t.it("works", proc() {
+				for k, v in test_vectors {
+					assertEqual(encodeString(k), v);
+				}
+			});
+		});
+
+		t.describe("decodeString", proc(t) {
+			t.it("works", proc() {
+				for k, v in test_vectors {
+					assertEqual(decodeString(v), k);
+				}	
+			});
+		});
+	});
+}

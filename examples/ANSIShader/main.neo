@@ -1,0 +1,49 @@
+#!/usr/bin/env neo
+
+import "std/math" as math;
+
+import "Shader";
+import "ShaderProgram";
+import "FrameBuffer";
+
+proc run(maxI) {
+    final fb = FrameBuffer(50, 20);
+        
+    final program = ShaderProgram();
+
+    final shader = Shader(proc(pixel, x, y, inputs) {
+        final res = inputs[0];
+        final t = inputs[1];
+        final u = x / res.width;
+        final v = y / res.height;
+
+        pixel.red = math.lerp(v, math.cos(t), math.sin(t));
+        pixel.green = v;
+        pixel.blue = math.lerp(u, math.sin(t), math.cos(t));
+    });
+    program.addShader(shader);
+
+    final res = shader.addInput();
+    final t = shader.addInput();
+    shader.setInput(res, { width = fb.width, height = fb.height });
+
+    var i = 0;
+    while true {
+        shader.setInput(t, i);
+
+        program.apply(fb);
+        fb.draw();
+
+        i += 0.1;
+
+        if maxI > 0 && i >= maxI  return;
+    }
+}
+
+proc main(args) {
+    if #args == 0 {
+        run(-1); 
+    } else {
+        run(parseNumber(args[0]));
+    }
+}

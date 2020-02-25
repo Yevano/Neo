@@ -1,0 +1,8 @@
+import "std/assert";
+
+import "../examples/collatz";
+
+exported proc main() {
+	var x = steps(42);
+	assertEqual(x, 8);
+}

@@ -1,0 +1,402 @@
+import "std/array" as array;
+import "std/assert";
+import "std/collections/option";
+
+proc Buffer() {
+    var data;
+    var full = false;
+
+    return frozen {
+        set = proc(v) {
+            if full  throw "Buffer is full";
+            data = v;
+            full = true;
+        },
+        get = proc() {
+            if !full  throw "Buffer is empty";
+            final v = data;
+            data = nil;
+            full = false;
+            return v;
+        },
+        has = proc() => full
+    };
+}
+
+exported proc Stream() {
+    final self = {};
+
+    self.filter = proc(fn) {
+        final s = Stream();
+        final buf = Buffer();
+        
+        s.next = proc() {
+            if !s.hasNext()  throw "next element does not exist";
+            return buf.get();
+        };
+
+        s.hasNext = proc() {
+            if buf.has()  return true;
+
+            var value;
+            do {
+                if !self.hasNext()  return false;
+                value = self.next();
+            } while(!fn(value));
+
+            buf.set(value);
+            return true;
+        };  
+
+        return frozen s;  
+    };
+
+    self.limit = proc(num) {
+        final s = Stream();
+        
+        var count = 0;
+
+        s.next = proc() {
+            if !s.hasNext()  throw "next element does not exist";
+            count += 1;
+            return self.next();
+        };
+
+        s.hasNext = proc() {
+            if !self.hasNext()  return false;
+            return count < num;
+        };
+
+        return frozen s;
+    };
+
+    self.skip = proc(num) {
+        final s = Stream();
+
+        var count = 0;
+
+        s.next = proc() {
+            if !s.hasNext()  throw "next element does not exist";
+            return self.next();
+        };
+
+        s.hasNext = proc() {
+            while count < num && self.hasNext() {
+                self.next();
+                count += 1;
+            }
+            return count == num && self.hasNext();
+        };
+
+        return frozen s;
+    };
+
+    self.stride = proc(num) {
+        final s = Stream();
+
+        final buf = Buffer();
+        var count = 0;
+
+        s.next = proc() {
+            if !s.hasNext()  throw "next element does not exist";
+            return buf.get();
+        };
+
+        s.hasNext = proc() {
+            if buf.has()  return true;
+
+            while count < num && self.hasNext() {
+                self.next();
+                count += 1;
+            }
+
+            if count == num {
+                count = 0;
+                buf.set(self.next());
+                return true;
+            }
+
+            return false;
+        };
+    };
+
+    self.map = proc(func) {
+        final s = Stream();
+
+        s.next = proc() => func(self.next());
+        s.hasNext = self.hasNext;
+
+        return frozen s;
+    };
+
+    self.peek = proc(func) {
+        final s = Stream();
+
+        s.next = proc() {
+            final next = self.next();
+            func(next);
+            return next;
+        };
+        s.hasNext = self.hasNext;
+
+        return frozen s;
+    };
+
+    self.distinct = proc() {
+        final s = Stream();
+
+        final buf = Buffer();
+        final visited = {};
+
+        s.next = proc() {
+            if !self.hasNext()  throw "next element does not exist";
+            return buf.get();
+        };
+
+        s.hasNext = proc() {
+            if buf.has()  return true;
+            if !self.hasNext()  return false;
+
+            var value = self.next();
+            while visited[value] != nil {
+                if !self.hasNext()  return false;
+                value = self.next();
+            }
+
+            visited[value] = true;
+            buf.set(value);
+            return true;
+        };
+    };
+
+    self.sorted = proc(comparator) {
+        final a = self.toArray();
+        array.sort(a, comparator);
+        return fromArray(a);
+    };
+
+    self.recur = proc(n) {
+        final s = Stream();
+
+        final buf = Option();
+        var count = 1;
+
+        s.next = proc() {
+            if !s.hasNext()  throw "next element does not exist";
+            count += 1;
+            return buf.get();
+        };
+
+        s.hasNext = proc() {
+            if self.hasNext() {
+                if buf.has() && count < n {
+                    return true;
+                } else {
+                    buf.set(self.next());
+                    count = 0;
+                    return true;
+                }
+            } else {
+                return buf.has() && count < n;
+            }
+        };
+
+        return frozen s;
+    };
+
+    self.count = proc() {
+        var count = 0;
+
+        while self.hasNext() {
+            self.next();
+            count += 1;
+        }
+
+        return count;
+    };
+
+    self.forEach = proc(func) {
+        assert(type(func) == "procedure", "expected procedure, got " .. type(func));
+
+        while self.hasNext()  func(self.next());
+    };
+
+    self.reduce = proc(identity, accumulator) {
+        final ret = Option();
+
+        if accumulator == nil {
+            accumulator = identity;
+
+            var result;
+            var foundAny = false;
+
+            while self.hasNext() {
+                if foundAny {
+                    result = accumulator(result, self.next());
+                } else {
+                    foundAny = true;
+                    result = self.next();
+                }
+            }
+
+            if foundAny  ret.set(result);
+        } else {
+            var result = identity;
+            while self.hasNext()  result = accumulator(result, self.next());
+            ret.set(result);
+        }
+
+        return ret;
+    };
+
+    self.findFirst = proc() {
+        final ret = Option();
+        if self.hasNext()  ret.set(self.next());
+        return ret;
+    };
+
+    self.findLast = proc() {
+        final ret = Option();
+        while self.hasNext()  ret.set(self.next());
+        return ret;
+    };
+
+    self.toArray = proc() {
+        final a = [];
+        while self.hasNext()  insert(a, self.next());
+        return a;
+    };
+
+    self.min = proc(comparator) {
+        final ret = Option();
+
+        final a = self.toArray();
+        if #a > 0 {
+            array.sort(a, comparator);
+            ret.set(a[0]);
+        }
+
+        return ret;
+    };
+
+    self.max = proc(comparator) {
+        final ret = Option();
+
+        final a = self.toArray();
+        if #a > 0 {
+            array.sort(a, comparator);
+            ret.set(a[#a - 1]);
+        }
+
+        return ret;
+    };
+
+    return self;
+}
+
+exported proc of(...) => fromArray(...)
+
+exported proc fromArray(a) {
+    if #a == 0  return empty();
+    if #a == 1  return single(a[0]);
+
+    final self = Stream();
+
+    var index = 0;
+
+    self.next = proc() {
+        if !self.hasNext()  throw "next element does not exist";
+        
+        final value = a[index];
+        index += 1;
+        return value;
+    };
+
+    self.hasNext = proc() => index < #a;
+
+    return frozen self;   
+}
+
+exported proc iterate(seed, func) {
+    final self = Stream();
+
+    var current = seed;
+    
+    self.next = proc() {
+        final value = current;
+        current = func(current);
+        return value;
+    };
+
+    self.hasNext = proc() => true;
+
+    return frozen self;
+}
+
+exported proc generate(func) {
+    final self = Stream();
+
+    self.next = proc() => func();
+    self.hasNext = proc() => true;
+
+    return frozen self;
+}
+
+exported proc concat(a, b) {
+    final self = Stream();
+
+    var current = a;
+
+    self.next = proc() {
+        if !self.hasNext()  throw "next element does not exist";
+        return current.next();
+    };
+
+    self.hasNext = proc() {
+        if current == nil {
+            return false;
+        } else {
+            if current.hasNext() {
+                return true;
+            } else {
+                if current == a {
+                    current = b;
+                    return self.hasNext();
+                } else {
+                    current = nil;
+                    return false;
+                }
+            }
+        }
+    };
+
+    return frozen self;
+}
+
+exported proc empty() {
+    final self = Stream();
+
+    self.next = proc() {
+        throw "next element does not exist";
+    };
+
+    self.hasNext = proc() => false;
+
+    return frozen self;
+}
+
+exported proc single(e) {
+    final self = Stream();
+
+    final buf = Buffer();
+    buf.set(e);
+
+    self.next = proc() {
+        if !self.hasNext()  throw "next element does not exist";
+        return buf.get();
+    };
+
+    self.hasNext = proc() => buf.has();
+
+    return frozen self;
+}

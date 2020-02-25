@@ -1,0 +1,23 @@
+import "std/ffi" as ffi;
+
+final vm;
+final native_LoadString;
+final native_LoadFile;
+
+proc ___init(_vm) {
+	vm = _vm;
+
+	native_LoadString = vm.LoadString;
+	native_LoadFile = vm.LoadFile;
+}
+
+exported proc loadstring(s, n) => ffi.unwrap(ffi.new("Neo.Runtime.Internal.ScopeProxy", native_LoadString(s, n == nil ? "chunk" : toString(n)).Scope))
+exported proc loadfile(f) => ffi.unwrap(ffi.new("Neo.Runtime.Internal.ScopeProxy", native_LoadFile(f).Scope))
+
+exported proc catchException(fn) {
+	try {
+		return fn();
+	} catch e {
+		return e;
+	}
+}

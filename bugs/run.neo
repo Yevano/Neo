@@ -1,0 +1,19 @@
+import "std/io/file";
+
+proc main() {
+	try {
+		final files = list(getParent(__FILE__));
+
+		for file in files {
+			final name = getName(file);
+			if name == "run.neo"  continue;
+
+			print("running " .. name);
+			final chunk = loadfile(file);
+			chunk.main();
+		}
+	} catch e {
+		print(e);
+		exit(1);
+	}
+}

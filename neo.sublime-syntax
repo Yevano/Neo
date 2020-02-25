@@ -1,0 +1,97 @@
+%YAML 1.2
+---
+file_extensions:
+  - neo
+scope: source.neo
+
+contexts:
+  prototype:
+    - include: comments
+    - include: multiline_comments
+
+  main:
+    - include: keywords
+    - include: numbers
+    - include: strings
+    - include: here_strings
+    - include: constants
+    - include: operators
+    - include: procs
+
+  operators:
+    - match: '=>|\+=|-=|%=|\*=|\/=|\^=|\.\.=|\+|-|%|#|\*|\/|\^|\*\*|!==|===|!=|==|<=|>=|<<|>>|<|>|\.\.\.|\.\.'
+      scope: keyword.operator.neo
+
+  keywords:
+    - match: '\b(exported|var|if|else|break|continue|for|in|to|by|while|do|defer|return|import|as|try|catch|throw|final|frozen|enum)\b'
+      scope: keyword.control.neo
+
+  constants:
+    - match: '\b(false|nil|true|)\b'
+      scope: constant.language.neo
+
+  numbers:
+    - match: '\b(-)?([0-9.]+|0[Xx][0-9A-Fa-f]+|0[Bb][01]+)\b'
+      scope: constant.numeric.neo
+
+  strings:
+    - match: '"'
+      scope: punctuation.definition.string.begin.neo
+      push: inside_string
+
+  inside_string:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.neo
+    - match: '\.'
+      scope: constant.character.escape.neo
+    - match: '"'
+      scope: punctuation.definition.string.end.neo
+      pop: true
+
+  here_strings:
+    - match: '@"'
+      scope: punctuation.definition.string.begin.neo
+      push: inside_here_string
+
+  inside_here_string:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.neo
+    - match: '\.'
+      scope: constant.character.escape.neo
+    - match: '"@'
+      scope: punctuation.definition.string.end.neo
+      pop: true
+
+  comments:
+    - match: '//'
+      scope: punctuation.definition.comment.neo
+      push:
+        - meta_scope: comment.line.double-slash.neo
+        - match: $\n?
+          pop: true
+
+  multiline_comments:
+    - match: '/\*'
+      scope: punctuation.definition.comment.begin.neo
+      push:
+        - meta_scope: comment.block.neo
+        - match: '\*/'
+          scope: punctuation.definition.comment.end.neo
+          pop: true
+
+  procs:
+    - match: '\b(proc)\s+([a-zA-Z_]\w*)\s*(\()([^)]*)(\))'
+      scope: meta.function.neo
+      captures:
+        1: keyword.control.neo
+        2: entity.name.function.neo
+        3: punctuation.definition.parameters.begin.neo
+        4: variable.parameter.function.neo
+        5: punctuation.definition.parameters.end.neo
+    - match: '\b(proc)\s*(\()([^)]*)(\))'
+      scope: meta.function.neo
+      captures:
+        1: keyword.control.neo
+        2: punctuation.definition.parameters.begin.neo
+        3: variable.parameter.function.neo
+        4: punctuation.definition.parameters.end.neo

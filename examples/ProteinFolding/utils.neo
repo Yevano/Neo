@@ -1,0 +1,25 @@
+import "std/assert";
+
+exported proc pretty_write(...) {
+    for s in ... {
+        if      s == "h"    write("\u001B[42m ");
+        else if s == "H"    write("\u001B[42m ");
+        else if s == "p"    write("\u001B[44m ");
+        else if s == "P"    write("\u001b[44m ");
+        else                write(s);
+        write("\u001B[0m");
+    }
+}
+
+exported proc makeChain(n) {
+    if n == 0  throw "no bits set";
+
+    var highest = -1;
+    for i in 0 to 31  if (n & (1 << i)) != 0  highest = i;
+
+    assert(highest != -1);    
+
+    var chain = "";
+    for i in 0 to highest  chain ..= (n & (1 << (highest - i))) != 0 ? "H" : "P";
+    return chain;
+}

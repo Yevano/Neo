@@ -1,0 +1,25 @@
+﻿import "std/assert";
+
+exported proc Stack() {
+	var data = [];
+
+	return frozen {
+		push = proc(element) {
+			insert(data, element);
+		},
+		pop = proc() {
+			assertNotEqual(#data, 0, "attempt to pop empty stack");
+			var index = #data - 1;
+			var element = data[index];
+			remove(data, index);
+			return element;
+		},
+		peek = proc() {
+			assertNotEqual(#data, 0, "attempt to peek empty stack");
+			return data[#data - 1];
+		},
+		size = proc() {
+			return #data;
+		}
+	};
+}

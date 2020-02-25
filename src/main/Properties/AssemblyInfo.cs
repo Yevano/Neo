@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Neo")]
-[assembly: AssemblyCopyright("Copyright © neo-lang.org 2017-2019")]
+[assembly: AssemblyCopyright("Copyright © Scitoshi Nakayobro 2017-2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

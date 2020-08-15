@@ -1,23 +1,49 @@
+final OptionMetaObject;
+
+proc __init() {
+    OptionMetaObject = {
+        __tostring = proc(o) {
+            if o.has() {
+                // TODO BUG: The following line results in:
+                // `error: attempt to modify final value `x`
+                // final x = o.get(); 
+
+                var x = o.get();
+                if x == o  return "Some(<self>)";
+                return $"Some({toString(x)})";
+            }
+            return "None";
+        }
+    };
+}
+
 exported proc Option() {
+    final self = {};
+    setMetaObject(self, OptionMetaObject);
+
     var data;
     var has = false;
 
-    return frozen {
-        set = proc(v) {
-            data = v;
-            has = true;
-        },
-        remove = proc() {
-            data = nil;
-            has = false;
-        },
-        get = proc() {
-            if !has  throw "Option is empty";
-            return data;
-        }, 
-        has = proc() => has,
-        ifPresent = proc(fn) {
-            if has  fn(data);
-        }
+    self.set = proc(v) {
+        data = v;
+        has = true;
     };
+
+    self.remove = proc() {
+        data = nil;
+        has = false;
+    };
+
+    self.get = proc() {
+        if !has  throw "Option is empty";
+        return data;
+    };
+
+    self.has = proc() => has;
+
+    self.ifPresent = proc(fn) {
+        if has  fn(data);
+    };
+
+    return frozen self;
 }

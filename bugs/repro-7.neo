@@ -1,0 +1,17 @@
+import "std/assert";
+
+exported proc main() {
+	final fns = {
+		a = proc(self) => 1,
+		b = proc(self) => 2
+	};
+
+	final obj = {};
+
+	for k, v in fns {
+		obj[k] = proc(...) => v(obj, $...);
+	}
+
+	assert(obj.a() == 1);
+	assert(obj.b() == 2);
+}

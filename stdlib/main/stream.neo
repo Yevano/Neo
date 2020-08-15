@@ -7,7 +7,7 @@ proc Buffer() {
     var full = false;
 
     return frozen {
-        set = proc(v) {
+        put = proc(v) {
             if full  throw "Buffer is full";
             data = v;
             full = true;
@@ -42,9 +42,9 @@ exported proc Stream() {
             do {
                 if !self.hasNext()  return false;
                 value = self.next();
-            } while(!fn(value));
+            } while !fn(value);
 
-            buf.set(value);
+            buf.put(value);
             return true;
         };  
 
@@ -112,7 +112,7 @@ exported proc Stream() {
 
             if count == num {
                 count = 0;
-                buf.set(self.next());
+                buf.put(self.next());
                 return true;
             }
 
@@ -164,9 +164,11 @@ exported proc Stream() {
             }
 
             visited[value] = true;
-            buf.set(value);
+            buf.put(value);
             return true;
         };
+
+        return frozen s;
     };
 
     self.sorted = proc(comparator) {
@@ -384,7 +386,7 @@ exported proc single(e) {
     final self = Stream();
 
     final buf = Buffer();
-    buf.set(e);
+    buf.put(e);
 
     self.next = proc() {
         if !self.hasNext()  throw "next element does not exist";

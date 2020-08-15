@@ -149,7 +149,7 @@ exported proc Stream() {
         final visited = {};
 
         s.next = proc() {
-            if !self.hasNext()  throw "next element does not exist";
+            if !s.hasNext()  throw "next element does not exist";
             return buf.take();
         };
 

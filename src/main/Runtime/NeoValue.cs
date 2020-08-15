@@ -55,8 +55,6 @@ namespace Neo.Runtime {
             throw new NeoError($"attempt to cast {Type} to {TypeName<T>()}");
         }
 
-        public bool IsConstant => IsNumber || IsBool || IsString || IsNil;
-
         public bool IsArray => Is<NeoArray>() || Is<FrozenNeoArrayWrapper>();
 
         public bool IsBool => Is<NeoBool>();

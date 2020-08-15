@@ -366,6 +366,11 @@ exported proc fromArray(a) {
     return frozen self;   
 }
 
+exported proc fromOption(o) {
+    if o.has()  return single(o.get());
+    return empty();
+}
+
 exported proc iterate(seed, func) {
     final self = Stream();
 
@@ -392,25 +397,8 @@ exported proc generate(func) {
 }
 
 exported proc concat(...) {
-    final self = Stream();
-
-    final streams = ...;
-    var current = 0;
-
-    self.next = proc() {
-        if !self.hasNext()  throw "next element does not exist";
-        final cs = streams[current];
-        final result = cs.next();
-        if(!cs.hasNext())  current++;
-        return result;        
-    };
-
-    self.hasNext = proc() {
-        if current >= #streams  return false;
-        return streams[current].hasNext();
-    };
-
-    return frozen self;
+    return fromArray(...)
+        .flatMap(proc(x) => x);
 }
 
 exported proc empty() {

@@ -24,8 +24,8 @@ proc Buffer() {
 }
 
 exported proc Stream(_next, _hasNext) {
-    assert(type(_next) == "procedure", "Expected procedure, got " .. type(_next));
-    assert(type(_hasNext) == "procedure", "Expected procedure, got " .. type(_hasNext));
+    assertType(_next, "procedure");
+    assertType(_hasNext, "procedure");
 
     final self = {
         next = proc() {
@@ -237,7 +237,7 @@ exported proc Stream(_next, _hasNext) {
     };
 
     self.forEach = proc(func) {
-        assert(type(func) == "procedure", "expected procedure, got " .. type(func));
+        assertType(func, "procedure");
 
         while self.hasNext()  func(self.next());
     };

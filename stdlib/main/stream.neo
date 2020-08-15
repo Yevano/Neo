@@ -124,7 +124,7 @@ exported proc Stream(_next, _hasNext) {
 
                 while self.hasNext() && count < limit {
                     self.next();
-                    count += 1;
+                    count++;
                 }
 
                 if count == limit {
@@ -230,7 +230,7 @@ exported proc Stream(_next, _hasNext) {
 
         while self.hasNext() {
             self.next();
-            count += 1;
+            count++;
         }
 
         return count;

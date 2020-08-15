@@ -127,7 +127,7 @@ namespace Neo.Utils {
                     Indent();
                     Append(".upvalue ");
                     Append(upvalue);
-                    AppendLine("\n");
+                    AppendLine();
                 }
                 foreach (var param in p.Parameters) {
                     Indent();
@@ -135,7 +135,7 @@ namespace Neo.Utils {
                     Append(param.Name);
                     Append(" ");
                     Append(param.Frozen);
-                    AppendLine("\n");
+                    AppendLine();
                 }
                 foreach (var proc in p.Procedures) {
                     AppendProcedure(proc);

@@ -37,7 +37,7 @@ namespace Neo.Backend {
 
         public void JIT() {
             if(!jitted && proc is InterpProcedure iproc) {
-                proc = vm.JIT.Compile(iproc.ParentScope, iproc.Chunk, iproc.Procedure, iproc.UpValues);
+                //proc = vm.JIT.Compile(iproc.ParentScope, iproc.Chunk, iproc.Procedure, iproc.UpValues);
                 jitted = true;
             }
         }

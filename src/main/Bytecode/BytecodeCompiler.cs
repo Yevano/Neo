@@ -470,6 +470,7 @@ namespace Neo.Bytecode {
             var end = asm.NewLabel();
             PushLoop(start, end, start);
             asm.Branch(end);
+            PushScope();
             asm.GetLocal(from);
             asm.GetLocal(idx);
             asm.ObjectIndex();
@@ -481,6 +482,7 @@ namespace Neo.Bytecode {
             node.Code.Accept(this);
             CloseScope();
             asm.Jump(start);
+            PopScope();
             asm.MarkLabel(end);
             PopLoop();
 

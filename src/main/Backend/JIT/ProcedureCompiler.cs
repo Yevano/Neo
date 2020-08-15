@@ -513,7 +513,6 @@ namespace Neo.Backend.JIT {
                         break;
                     case Bytecode.OpCode.CLOSE: {
                             var name = ReadConstant().CheckString().Value;
-
                             il.Emit(OpCodes.Ldloc, openUps);
                             il.Emit(OpCodes.Ldstr, name);
                             il.Emit(OpCodes.Call, typeof(JITProcedure).GetMethod("Close", new[] { typeof(Dictionary<string, UpValue>), typeof(string) }));

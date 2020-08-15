@@ -54,6 +54,8 @@ namespace Neo.Bytecode {
             writer.Write(-1);
         }
 
+        public string Name => name;
+
         private void WriteConstantType(ConstantType type) {
             writer.Write((byte)type);
         }

@@ -201,6 +201,8 @@ namespace Neo {
 
             if (baseLib != null) chunk.Scope.Import(baseLib);
 
+            if(chunk.Chunk.Name == "repro-7.neo") Console.WriteLine(ChunkToText.Encode(chunk.Chunk));
+
             PushFrame(chunk.Chunk.Name, "__init", -1);
             Interpreter.Compile(chunk.Scope, chunk.Chunk, chunk.Chunk.Initializer, new UpValue[0]).Call(new NeoValue[0]);
             PopFrame();
@@ -287,7 +289,6 @@ namespace Neo {
             } else {
                 extraSourceSearchPaths = extra.Split(':');
                 // TODO: Check these?
-                // TODO: Handle absolute vs. relative? Or should we require absolute?
             }
         }
 

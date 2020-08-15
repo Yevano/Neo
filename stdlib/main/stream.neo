@@ -115,8 +115,10 @@ exported proc Stream() {
 
             if count == limit {
                 count = 0;
-                if self.hasNext()  buf.put(self.next());
-                return true;
+                if self.hasNext() {
+                    buf.put(self.next());
+                    return true;
+                }
             }
 
             return false;

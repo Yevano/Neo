@@ -136,6 +136,33 @@ exported proc Stream() {
         return frozen s;
     };
 
+    self.flatMap = proc(func) {
+        if !self.hasNext()  return empty();
+
+        final s = Stream();
+
+        var current = func(self.next());
+
+        s.next = proc() {
+            // NOTE TODO: We've duplicated this in most `next` implementations;
+            // can we uh, do something about that? (that isn't terrible..)
+            if !s.hasNext()  throw "next element does not exist";
+            return current.next();
+        };
+
+        s.hasNext = proc() {
+            if current == nil  return false;
+
+            while !current.hasNext() && self.hasNext() {
+                current = func(self.next());
+            }
+
+            return current != nil && current.hasNext();
+        };
+
+        return frozen s;
+    };
+
     self.peek = proc(func) {
         final s = Stream();
 

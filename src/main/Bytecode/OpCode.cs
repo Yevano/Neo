@@ -74,8 +74,11 @@
         GET_UPVALUE,
         SET_UPVALUE,
 
+        // NOTE TODO: All opcodes below this comment should be removed/replaced eventually!
         TRY,
         THROW,
-        DECLARE
+        DECLARE,
+        PUSH_SCOPE,
+        POP_SCOPE
     }
 }

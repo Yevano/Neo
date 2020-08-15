@@ -601,6 +601,18 @@ namespace Neo.Backend.JIT {
                             il.Emit(OpCodes.Call, typeof(Scope).GetMethod("Declare", new[] { typeof(string), typeof(VariableFlags) }));
                         }
                         break;
+                    case Bytecode.OpCode.PUSH_SCOPE: {
+                            il.Emit(OpCodes.Ldloc, scope);
+                            il.Emit(OpCodes.Newobj, typeof(Scope).GetConstructor(new[] { typeof(Scope) }));
+                            il.Emit(OpCodes.Stloc, scope);
+                        }
+                        break;
+                    case Bytecode.OpCode.POP_SCOPE: {
+                            il.Emit(OpCodes.Ldloc, scope);
+                            il.Emit(OpCodes.Call, typeof(Scope).GetMethod("get_Parent"));
+                            il.Emit(OpCodes.Stloc, scope);
+                        }
+                        break;
                     default: {
                             throw new Exception($"Unexpected opcode: {op}");
                         }

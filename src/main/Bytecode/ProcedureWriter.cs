@@ -447,6 +447,14 @@ namespace Neo.Bytecode {
         	writer.Write((byte)flags);
         }
 
+        public void PushScope() {
+            WriteOpCode(OpCode.PUSH_SCOPE);
+        }
+
+        public void PopScope() {
+            WriteOpCode(OpCode.POP_SCOPE);
+        }
+
         internal sealed class Patch {
             public int Index;
 

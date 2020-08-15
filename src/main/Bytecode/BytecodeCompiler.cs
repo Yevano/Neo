@@ -61,11 +61,11 @@ namespace Neo.Bytecode {
         }
 
         private void PushScope() {
-            // keeping this around _for now_
+            asm.PushScope();
         }
 
         private void PopScope() {
-            // keeping this around _for now_
+            asm.PopScope();
         }
 
         private void CloseScope() {

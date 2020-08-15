@@ -494,6 +494,14 @@ namespace Neo.Backend.Interp {
                                 scope.Declare(name, (VariableFlags)flags);
                             }
                             break;
+                        case OpCode.PUSH_SCOPE: {
+                                scope = new Scope(scope);
+                            }
+                            break;
+                        case OpCode.POP_SCOPE: {
+                                scope = scope.Parent;
+                            }
+                            break;
                         default: {
                                 throw new Exception($"Unexpected opcode: {op}");
                             }

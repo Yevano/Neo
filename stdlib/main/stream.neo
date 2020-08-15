@@ -293,6 +293,24 @@ exported proc Stream() {
         return ret;
     };
 
+    self.anyMatch = proc(predicate) {
+        while self.hasNext() {
+            if predicate(self.next())  return true;
+        }
+
+        return false;
+    };
+
+    self.noneMatch = proc(predicate) {
+        // NOTE TODO: Should we just say return !self.anyMatch(predicate) instead? *shrugs*
+
+        while self.hasNext() {
+            if predicate(self.next())  return false;
+        }
+
+        return true;
+    };
+
     return self;
 }
 

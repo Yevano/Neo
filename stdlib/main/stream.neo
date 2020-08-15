@@ -376,7 +376,7 @@ exported proc fromArray(a) {
     var index = 0;
 
     return generate(proc() => a[index++])
-        .limitWhile(proc(_) => index < #a);
+        .limitWhile(proc() => index < #a);
 }
 
 exported proc fromOption(o) {

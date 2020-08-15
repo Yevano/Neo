@@ -7,6 +7,9 @@ proc __init() {
                 // TODO BUG: The following line results in:
                 // `error: attempt to modify final value `x`
                 // final x = o.get(); 
+                // UPDATE: This is no longer happening; doh!
+                // I should have written down _something_ for repro...
+                // Ah well. Will leave this here for now... ig.
 
                 var x = o.get();
                 if x == o  return "Some(<self>)";

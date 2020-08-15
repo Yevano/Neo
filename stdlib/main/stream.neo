@@ -94,8 +94,11 @@ exported proc Stream() {
     self.stride = proc(num) {
         final s = Stream();
 
+        final limit = num - 1;
+        assert(limit > 0);
+
         final buf = Buffer();
-        var count = 0;
+        var count = limit;
 
         s.next = proc() {
             if !s.hasNext()  throw "next element does not exist";
@@ -105,19 +108,21 @@ exported proc Stream() {
         s.hasNext = proc() {
             if buf.has()  return true;
 
-            while count < num && self.hasNext() {
+            while self.hasNext() && count < limit {
                 self.next();
                 count += 1;
             }
 
-            if count == num {
+            if count == limit {
                 count = 0;
-                buf.put(self.next());
+                if self.hasNext()  buf.put(self.next());
                 return true;
             }
 
             return false;
         };
+
+        return frozen s;
     };
 
     self.map = proc(func) {

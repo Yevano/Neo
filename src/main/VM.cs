@@ -18,7 +18,7 @@ using Neo.Utils;
 
 namespace Neo {
     public sealed class VM {
-        public static readonly SemanticVersion VERSION = new SemanticVersion(0, 3, 2);
+        public static readonly SemanticVersion VERSION = new SemanticVersion(0, 3, 3);
 
         private string sourceRoot;
         private Dictionary<string, Scope> modules;

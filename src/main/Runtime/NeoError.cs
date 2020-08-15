@@ -9,6 +9,13 @@ namespace Neo.Runtime {
         	Line = line;
         }
 
+        public NeoError(string message, string chunkName, int line) : base(message) {
+        	ChunkName = chunkName;
+            Line = line;
+        }
+
+        public string ChunkName { get; set;}
+
         public int Line { get; set; }
     }
 }

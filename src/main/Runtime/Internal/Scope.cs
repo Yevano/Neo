@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Neo.Bytecode;
+using Neo.Runtime;
 
 namespace Neo.Runtime.Internal {
     public sealed class Scope {
@@ -67,6 +68,7 @@ namespace Neo.Runtime.Internal {
         public bool IsFinal(string name) => finals.Contains(name);
 
         public void Declare(string name, VariableFlags flags) {
+            if(bindings.ContainsKey(name)) throw new NeoError("attempt to redeclare '" + name + "'");
             bindings[name] = SENTINEL;
             if (flags.HasFlag(VariableFlags.EXPORTED)) Export(name);
             if (flags.HasFlag(VariableFlags.FINAL)) MarkFinal(name);

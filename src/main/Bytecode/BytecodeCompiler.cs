@@ -112,6 +112,7 @@ namespace Neo.Bytecode {
                     asm.SetLocal(proc.Name);
                 }
             } else {
+                if (chunk.Procedures.ContainsKey(proc.Name)) throw new NeoError("attempt to redeclare '" + proc.Name + "'", ast.Name, proc.Line);
                 chunk.Procedures[proc.Name] = proc;
             }
 
@@ -873,10 +874,7 @@ namespace Neo.Bytecode {
                 asm.Return();
             }
 
-            var pasm = asm;
-            var proc = FinishProcedure();
-
-            Closure(proc);
+            Closure(FinishProcedure());
         }
 
         public void VisitVarargs(VarargsNode node) {

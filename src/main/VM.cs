@@ -246,7 +246,10 @@ namespace Neo {
 
             var st = GetStackTrace();
 
-            if(st.Length == 0) return;
+            if(st.Length == 0) {
+                Console.WriteLine($"    at {error.ChunkName}:{error.Line}");
+                return;
+            }
 
             var top = st[0];
             Console.WriteLine($"    at {top.ProcedureName}({top.ChunkName}:{error.Line})");

@@ -186,7 +186,7 @@ exported proc Stream() {
         s.next = proc() {
             if !s.hasNext()  throw "next element does not exist";
             count += 1;
-            return buf.take();
+            return buf.get();
         };
 
         s.hasNext = proc() {

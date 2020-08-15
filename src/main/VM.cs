@@ -31,6 +31,8 @@ namespace Neo {
 
         private Scope baseLib;
 
+        private string[] extraSourceSearchPaths;
+
         public VM() {
             Interpreter = new InterpreterBackend(this);
             JIT = new JITBackend(this);
@@ -140,11 +142,12 @@ namespace Neo {
             } else if(rawPath.StartsWith("std")) { // @TODO @Hack StartsWith("std")
                 value = LoadSTDModule(rawPath);
             } else {
-                var paths = new[] {
+                var paths = new List<string>() {
                     importSearchPath,
                     sourceRoot,
                     AppDomain.CurrentDomain.BaseDirectory
                 };
+                paths.AddRange(extraSourceSearchPaths);
 
                 var path = $"{SanatizePath(rawPath)}.neo";
                 foreach (var tpath in paths) {
@@ -261,8 +264,37 @@ namespace Neo {
             }
         }
 
+        private void PrintStackTrace(StackOverflowException _e) {
+            Console.WriteLine("error: stack overflow");
+            
+            var st = GetStackTrace();
+
+            var top = st[0];
+            Console.WriteLine($"    at {top.ProcedureName}({top.ChunkName}):???");
+
+            for(var i = 1; i < st.Length; i++) {
+                var prev = st[i - 1];
+                var curr = st[i];
+                Console.WriteLine($"    at {curr.ProcedureName}({curr.ChunkName}):{prev.CallSiteLine}");
+            }
+        }
+
+        private void LoadEnvironment() {
+            string extra = Environment.GetEnvironmentVariable("NEO_SEARCH_PATH");
+            
+            if(string.IsNullOrEmpty(extra)) {
+                extraSourceSearchPaths = new string[0];
+            } else {
+                extraSourceSearchPaths = extra.Split(':');
+                // TODO: Check these?
+                // TODO: Handle absolute vs. relative? Or should we require absolute?
+            }
+        }
+
         public void Run(string file, string[] args) {
             try {
+                LoadEnvironment();
+
                 var path = Path.GetFullPath(file);
                 sourceRoot = Directory.GetParent(path).FullName;
                 
@@ -285,6 +317,9 @@ namespace Neo {
                 PopFrame();
             } catch (NeoError e) {
                 PrintStackTrace(e);
+                Environment.Exit(1);
+            } catch(StackOverflowException e) {
+                PrintStackTrace(e);                
                 Environment.Exit(1);
             }
         }

@@ -70,6 +70,35 @@ exported proc Stream() {
         return frozen s;
     };
 
+    self.limitWhile = proc(predicate) {
+        final s = Stream();
+
+        final buf = Buffer();
+
+        s.next = proc() {
+            if !s.hasNext()  throw "next element does not exist";
+            return buf.take();
+        };
+
+        s.hasNext = proc() {
+            if buf.has()  return true;
+
+            if self.hasNext() {
+                final x = self.next();
+                if predicate(x) {
+                    buf.put(x);
+                    return true;    
+                }
+            }
+
+            return false;
+        };
+
+        return frozen s;
+    };
+
+    self.limitUntil = proc(predicate) => self.limitWhile(proc(x) => !predicate(x));
+
     self.skip = proc(num) {
         assert(num >= 0, "Can't skip a negative number of Stream elements");
         if num == 0  return self;
@@ -333,15 +362,7 @@ exported proc Stream() {
         return false;
     };
 
-    self.noneMatch = proc(predicate) {
-        // NOTE TODO: Should we just say return !self.anyMatch(predicate) instead? *shrugs*
-
-        while self.hasNext() {
-            if predicate(self.next())  return false;
-        }
-
-        return true;
-    };
+    self.noneMatch = proc(predicate) => !self.anyMatch(predicate);
 
     return self;
 }

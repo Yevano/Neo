@@ -194,6 +194,7 @@ exported proc Stream(_next, _hasNext) {
     };
 
     self.sorted = proc(comparator) {
+        if comparator == nil  comparator = array.default_comparator;
         final a = self.toArray();
         array.sort(a, comparator);
         return fromArray(a);
@@ -278,31 +279,17 @@ exported proc Stream(_next, _hasNext) {
         return a;
     };
 
-    self.min = proc(comparator) {
-        if comparator == nil  comparator = array.default_comparator;
-        
+    self.min = proc(comparator) {        
+        final a = self.sorted(comparator);
         final ret = Option();
-
-        final a = self.toArray();
-        if #a > 0 {
-            array.sort(a, comparator);
-            ret.set(a[0]);
-        }
-
+        if #a > 0  ret.set(a[0]);
         return ret;
     };
 
     self.max = proc(comparator) {
-        if comparator == nil  comparator = array.default_comparator;
-
+        final a = self.sorted(comparator);
         final ret = Option();
-
-        final a = self.toArray();
-        if #a > 0 {
-            array.sort(a, comparator);
-            ret.set(a[#a - 1]);
-        }
-
+        if #a > 0  ret.set(a[#a - 1]);
         return ret;
     };
 

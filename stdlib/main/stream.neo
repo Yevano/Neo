@@ -373,21 +373,10 @@ exported proc fromArray(a) {
     if #a == 0  return empty();
     if #a == 1  return single(a[0]);
 
-    final self = Stream();
-
     var index = 0;
 
-    self.next = proc() {
-        if !self.hasNext()  throw "next element does not exist";
-        
-        final value = a[index];
-        index += 1;
-        return value;
-    };
-
-    self.hasNext = proc() => index < #a;
-
-    return frozen self;   
+    return generate(proc() => a[index++])
+        .limitWhile(proc(_) => index < #a);
 }
 
 exported proc fromOption(o) {

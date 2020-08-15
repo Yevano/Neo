@@ -1,0 +1,5 @@
+exported proc main() {
+	final a = [ 1, 2, 3 ];
+
+	print($"new({#a})");
+}

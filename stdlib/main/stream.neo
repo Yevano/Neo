@@ -268,6 +268,8 @@ exported proc Stream() {
     };
 
     self.min = proc(comparator) {
+        if comparator == nil  comparator = array.default_comparator;
+        
         final ret = Option();
 
         final a = self.toArray();
@@ -280,6 +282,8 @@ exported proc Stream() {
     };
 
     self.max = proc(comparator) {
+        if comparator == nil  comparator = array.default_comparator;
+
         final ret = Option();
 
         final a = self.toArray();

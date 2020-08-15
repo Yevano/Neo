@@ -224,30 +224,21 @@ exported proc Stream() {
     };
 
     self.reduce = proc(identity, accumulator) {
-        final ret = Option();
+        if !self.hasNext()  return Option();
 
         if accumulator == nil {
             accumulator = identity;
-
-            var result;
-            var foundAny = false;
-
-            while self.hasNext() {
-                if foundAny {
-                    result = accumulator(result, self.next());
-                } else {
-                    foundAny = true;
-                    result = self.next();
-                }
-            }
-
-            if foundAny  ret.set(result);
-        } else {
-            var result = identity;
-            while self.hasNext()  result = accumulator(result, self.next());
-            ret.set(result);
+            identity = self.next();
         }
 
+        var result = identity;
+
+        while self.hasNext() {
+            result = accumulator(result, self.next());
+        }
+
+        final ret = Option();
+        ret.set(result);
         return ret;
     };
 

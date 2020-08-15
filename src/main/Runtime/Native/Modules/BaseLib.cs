@@ -11,7 +11,7 @@ namespace Neo.Runtime.Native.Modules {
 		}
 
 		[NativeValue("print")]
-		public static NeoValue print(NeoValue[] args) {
+		public static NeoValue Print(NeoValue[] args) {
 			if(args.Length == 0) {
 				Console.WriteLine();
 			} else {

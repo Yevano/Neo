@@ -71,6 +71,9 @@ exported proc Stream() {
     };
 
     self.skip = proc(num) {
+        assert(num >= 0, "Can't skip a negative number of Stream elements");
+        if num == 0  return self;
+
         final s = Stream();
 
         var count = 0;

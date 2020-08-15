@@ -373,6 +373,28 @@ exported proc concat(a, b) {
     return frozen self;
 }
 
+exported proc concat(...) {
+    final self = Stream();
+
+    final streams = ...;
+    var current = 0;
+
+    self.next = proc() {
+        if !self.hasNext()  throw "next element does not exist";
+        final cs = streams[current];
+        final result = cs.next();
+        if(!cs.hasNext())  current++;
+        return result;        
+    };
+
+    self.hasNext = proc() {
+        if current >= #streams  return false;
+        return streams[current].hasNext();
+    };
+
+    return frozen self;
+}
+
 exported proc empty() {
     final self = Stream();
 

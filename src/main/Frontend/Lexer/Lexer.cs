@@ -104,8 +104,7 @@ namespace Neo.Frontend.Lexer {
                         Next();
                         break;
                     case '\t':
-                        Next();
-                        break;
+                    case '\r':
                     case ' ':
                         Next();
                         break;

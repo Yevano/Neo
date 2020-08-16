@@ -118,6 +118,21 @@ namespace Neo.Bytecode {
             }
         }
 
+        private void PreLoopCode(StatementNode code) {
+            if(code is BlockNode) return;
+
+            PushUpValueTracking();
+        }
+
+        private void PostLoopCode(StatementNode code) {
+            if(code is BlockNode) return;
+
+            var ups = PopUpValueTracking();
+            foreach(var up in ups) {
+                asm.Close(up);
+            }
+        }
+
         private void Closure(Procedure proc) {
             asm.Closure(proc.Name);
             foreach (var upvalue in proc.UpValues) {
@@ -415,16 +430,16 @@ namespace Neo.Bytecode {
             var codeEnd = asm.NewLabel();
             PushLoop(start, end, codeEnd);
             asm.Branch(end);
+            PreLoopCode(node.Code);
             node.Code.Accept(this);
             asm.MarkLabel(codeEnd);
-            // CloseScope();
+            PostLoopCode(node.Code);
             asm.GetLocal(node.Iterator.Value);
             asm.GetLocal(byValue);
             asm.Add();
             asm.SetLocal(node.Iterator.Value);
             asm.Jump(start);
             asm.MarkLabel(end);
-            // CloseScope();
             PopLoop();
 
             PopScope();
@@ -465,14 +480,9 @@ namespace Neo.Bytecode {
             asm.GetLocal(idx);
             asm.Inc();
             asm.SetLocal(idx);
-            if(!(node.Code is BlockNode)) PushUpValueTracking();
+            PreLoopCode(node.Code);
             node.Code.Accept(this);
-            if(!(node.Code is BlockNode)) {
-                var ups = PopUpValueTracking();
-                foreach(var up in ups) {
-                    asm.Close(up);
-                }
-            }
+            PostLoopCode(node.Code);
             asm.Jump(start);
             asm.MarkLabel(end);
             PopLoop();
@@ -518,11 +528,9 @@ namespace Neo.Bytecode {
             asm.GetLocal(idx);
             asm.Inc();
             asm.SetLocal(idx);
-            if(!(node.Code is BlockNode)) PushUpValueTracking();
+            PreLoopCode(node.Code);
             node.Code.Accept(this);
-            if(!(node.Code is BlockNode)) {
-                PopUpValueTrackingAndClose();
-            }
+            PostLoopCode(node.Code);
             asm.Jump(start);
             asm.MarkLabel(end);
             PopLoop();

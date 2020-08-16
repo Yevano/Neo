@@ -22,6 +22,9 @@ namespace Neo.Bytecode {
         private Loop loop;
         private readonly Stack<Loop> loops;
 
+        private HashSet<string> upValues;
+        private Stack<HashSet<string>> upValuesStack;
+
         private Chunk chunk;
 
         public BytecodeCompiler(ChunkNode ast) {
@@ -31,8 +34,8 @@ namespace Neo.Bytecode {
             writer = new BinaryWriter(stream);
 
             procedures = new Stack<ProcedureWriter>();
-
             loops = new Stack<Loop>();
+            upValuesStack = new Stack<HashSet<string>>();
 
             chunk = new Chunk(ast);
         }
@@ -68,10 +71,6 @@ namespace Neo.Bytecode {
             asm.PopScope();
         }
 
-        private void CloseScope() {
-            foreach (var up in asm.UsedUpValues) asm.Close(up);
-        }
-
         private void PushLoop(Label start, Label end, Label codeEnd) {
             loops.Push(loop);
             loop = new Loop() {
@@ -85,13 +84,47 @@ namespace Neo.Bytecode {
             loop = loops.Pop();
         }
 
+        private void GetUpValue(string name) {
+            if(upValues != null && !upValues.Contains(name)) {
+                upValues.Add(name);
+            }
+
+            asm.GetUpValue(name);
+        }
+
+        private void SetUpValue(string name) {
+            if(upValues != null && !upValues.Contains(name)) {
+                upValues.Add(name);
+            }
+
+            asm.SetUpValue(name);
+        }
+
+        private void PushUpValueTracking() {
+            upValuesStack.Push(upValues);
+            upValues = new HashSet<string>();
+        }
+
+        private HashSet<string> PopUpValueTracking() {
+            var result = upValues;
+            upValues = upValuesStack.Pop();
+            return result;
+        }
+
+        private void PopUpValueTrackingAndClose() {
+            var ups = PopUpValueTracking();
+            foreach(var up in ups) {
+                asm.Close(up);
+            }
+        }
+
         private void Closure(Procedure proc) {
             asm.Closure(proc.Name);
             foreach (var upvalue in proc.UpValues) {
                 if (asm.IsLocal(upvalue)) {
                     asm.GetLocal(upvalue);
                 } else if (asm.IsUpValue(upvalue)) {
-                    asm.GetUpValue(upvalue);
+                    GetUpValue(upvalue);
                 } else {
                     throw new Exception(upvalue);
                 }
@@ -384,13 +417,14 @@ namespace Neo.Bytecode {
             asm.Branch(end);
             node.Code.Accept(this);
             asm.MarkLabel(codeEnd);
-            CloseScope();
+            // CloseScope();
             asm.GetLocal(node.Iterator.Value);
             asm.GetLocal(byValue);
             asm.Add();
             asm.SetLocal(node.Iterator.Value);
             asm.Jump(start);
             asm.MarkLabel(end);
+            // CloseScope();
             PopLoop();
 
             PopScope();
@@ -431,8 +465,14 @@ namespace Neo.Bytecode {
             asm.GetLocal(idx);
             asm.Inc();
             asm.SetLocal(idx);
+            if(!(node.Code is BlockNode)) PushUpValueTracking();
             node.Code.Accept(this);
-            CloseScope();
+            if(!(node.Code is BlockNode)) {
+                var ups = PopUpValueTracking();
+                foreach(var up in ups) {
+                    asm.Close(up);
+                }
+            }
             asm.Jump(start);
             asm.MarkLabel(end);
             PopLoop();
@@ -470,7 +510,6 @@ namespace Neo.Bytecode {
             var end = asm.NewLabel();
             PushLoop(start, end, start);
             asm.Branch(end);
-            PushScope();
             asm.GetLocal(from);
             asm.GetLocal(idx);
             asm.ObjectIndex();
@@ -479,10 +518,12 @@ namespace Neo.Bytecode {
             asm.GetLocal(idx);
             asm.Inc();
             asm.SetLocal(idx);
+            if(!(node.Code is BlockNode)) PushUpValueTracking();
             node.Code.Accept(this);
-            CloseScope();
+            if(!(node.Code is BlockNode)) {
+                PopUpValueTrackingAndClose();
+            }
             asm.Jump(start);
-            PopScope();
             asm.MarkLabel(end);
             PopLoop();
 
@@ -507,7 +548,7 @@ namespace Neo.Bytecode {
                 if (asm.IsLocal(i.Value)) {
                     asm.SetLocal(i.Value);
                 } else if (asm.IsUpValue(i.Value)) {
-                    asm.SetUpValue(i.Value);
+                    SetUpValue(i.Value);
                 } else {
                     asm.SetGlobal(i.Value);
                 }
@@ -575,7 +616,7 @@ namespace Neo.Bytecode {
                     if (asm.IsLocal(i.Value)) {
                         asm.SetLocal(i.Value);
                     } else if (asm.IsUpValue(i.Value)) {
-                        asm.SetUpValue(i.Value);
+                        SetUpValue(i.Value);
                     } else {
                         asm.SetGlobal(i.Value);
                     }
@@ -683,7 +724,7 @@ namespace Neo.Bytecode {
                     if (asm.IsLocal(i.Value)) {
                         asm.SetLocal(i.Value);
                     } else if (asm.IsUpValue(i.Value)) {
-                        asm.SetUpValue(i.Value);
+                        SetUpValue(i.Value);
                     } else {
                         asm.SetGlobal(i.Value);
                     }
@@ -709,11 +750,16 @@ namespace Neo.Bytecode {
             UpdateLine(node);
             PushScope();
 
+            PushUpValueTracking();
             foreach (var s in node.Statements) {
                 s.Accept(this);
             }
+            var ups = PopUpValueTracking();
 
-            CloseScope();
+            foreach(var up in ups) {
+                asm.Close(up);
+            }
+
             PopScope();
         }
 
@@ -722,7 +768,7 @@ namespace Neo.Bytecode {
             if (asm.IsLocal(node.Value)) {
                 asm.GetLocal(node.Value);
             } else if (asm.IsUpValue(node.Value)) {
-                asm.GetUpValue(node.Value);
+                GetUpValue(node.Value);
             } else {
                 asm.GetGlobal(node.Value);
             }
